@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "918655092924",
+    "project_id": "amm-stareducationcentre",
+    "storage_bucket": "amm-stareducationcentre.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:918655092924:android:753b7d07e0eb4b94a1a8b9",
+        "android_client_info": {
+          "package_name": "com.starEducation.star_education_centre"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCYyMVlBOJ6fbGx_5YwinVuESFOj4AKLjU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
