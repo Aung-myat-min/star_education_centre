@@ -48,7 +48,7 @@ class Student {
     bool status = false;
 
     try {
-      await _studentFireStore.add(toMap());
+      await _studentFireStore.doc(_sId).set(toMap());
       status = true;
     } catch (error) {
       print("Error registering student: $error");
