@@ -16,6 +16,8 @@ class Student {
   Student(this._sId, this.firstName, this.lastName, this.email, this.phone,
       this.address, this.section);
 
+  String get studentId => _sId;
+
   // Method to convert a Student object to a Map (for Firestore)
   Map<String, dynamic> toMap() {
     return {
@@ -59,21 +61,10 @@ class Student {
   }
 
   // Read (Get) students from Firestore
-  static Future<List<Student>> readStudents() async {
-    List<Student> list = [];
-
-    try {
-      QuerySnapshot snapshot = await _studentFireStore.get();
-      snapshot.docs.forEach((doc) {
-        Student x = fromDocument(doc);
-        list.add(x);
-      });
-    } catch (error) {
-      print('Error reading students: $error');
-      list = [];
-    }
-
-    return list;
+  static Stream<List<Student>> readStudents() {
+    return _studentFireStore.snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) => fromDocument(doc)).toList();
+    });
   }
 
   // Read student by Id

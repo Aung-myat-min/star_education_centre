@@ -45,7 +45,7 @@ class Enrollment {
   }
 
   // Create (Register) an enrollment in Firestore
-  Future<bool> registerStudent() async {
+  Future<bool> enrollStudent() async {
     bool status = false;
 
     try {
