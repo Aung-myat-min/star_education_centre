@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:star_education_centre/constants.dart';
 import 'package:star_education_centre/models/student.dart';
 import 'package:star_education_centre/utils/custom_text_field.dart';
+import 'package:star_education_centre/utils/hoverable_container.dart';
 
 class StudentPage extends StatefulWidget {
   const StudentPage({super.key});
@@ -284,84 +285,104 @@ class _StudentList extends StatefulWidget {
 }
 
 class _StudentListState extends State<_StudentList> {
+  String _searchQuery = '';
+  String? _selectedSection;
+
+  final List<String> _sections = ['A', 'B', 'C', 'D'];
+
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
       constraints: const BoxConstraints(
         minHeight: 200,
       ),
-      child: SizedBox(
-        height: 300, // Set a fixed height or adjust as needed
-        child: StreamBuilder<List<Student>>(
-          stream: Student.readStudents(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text('No students found.'));
-            }
-
-            final students = snapshot.data!;
-
-            return GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-                childAspectRatio: 1,
-              ),
-              itemCount: students.length,
-              itemBuilder: (BuildContext context, int index) {
-                final student = students[index];
-                return SelectionArea(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.teal.shade400,
-                      borderRadius: BorderRadius.circular(10),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                // Name Search Field
+                Expanded(
+                  child: TextField(
+                    decoration: const InputDecoration(
+                      labelText: 'Search by Name',
+                      border: OutlineInputBorder(),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'ID: ${student.studentId}',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            '${student.firstName} ${student.lastName}',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.white,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Phone: ${student.phone}',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.white,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value;
+                      });
+                    },
                   ),
+                ),
+                const SizedBox(width: 8),
+                // Section Filter Dropdown
+                DropdownButton<String>(
+                  value: _selectedSection,
+                  hint: const Text('Select Section'),
+                  items: _sections.map((section) {
+                    return DropdownMenuItem<String>(
+                      value: section,
+                      child: Text(section),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedSection = value;
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 300,
+            child: StreamBuilder<List<Student>>(
+              stream: Student.readStudents(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text('No students found.'));
+                }
+
+                final students = snapshot.data!
+                    .where((student) {
+                  final matchesSearch = '${student.firstName} ${student.lastName}'
+                      .toLowerCase()
+                      .contains(_searchQuery.toLowerCase());
+                  final matchesSection = _selectedSection == null ||
+                      student.section == _selectedSection;
+                  return matchesSearch && matchesSection;
+                })
+                    .toList();
+
+                if (students.isEmpty) {
+                  return const Center(child: Text('No students match your criteria.'));
+                }
+
+                return GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                    childAspectRatio: 1,
+                  ),
+                  itemCount: students.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final student = students[index];
+                    return SelectionArea(
+                      child: HoverableContainer(student: student)
+                    );
+                  },
                 );
               },
-            );
-          },
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }
