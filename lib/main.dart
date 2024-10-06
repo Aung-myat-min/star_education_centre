@@ -1,6 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:star_education_centre/main_page.dart';
+import 'package:star_education_centre/pages/attendance_page.dart';
+import 'package:star_education_centre/pages/auth/login_page.dart';
+import 'package:star_education_centre/pages/courses_page.dart';
+import 'package:star_education_centre/pages/home_page.dart';
 import 'package:star_education_centre/pages/student_page.dart';
 
 void main() async {
@@ -24,6 +29,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, WidgetBuilder> routes = {
+      '/login': (context) => LoginPage(),
+    };
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Star Education Centre',
@@ -32,7 +41,9 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.tealAccent),
         useMaterial3: true,
       ),
-      home: StudentPage(),
+      routes: routes,
+      initialRoute: '/',
+      home: const MainPage(),
     );
   }
 }
