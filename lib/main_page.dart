@@ -36,7 +36,7 @@ class _MainPageState extends State<MainPage> {
         backgroundColor: Colors.teal,
         currentIndex: _currentIndex,
         onTap: onTabTapped,
-        selectedItemColor: Colors.white,
+        selectedItemColor: Colors.black,
         unselectedItemColor: Colors.grey.shade300,
         items: const [
           BottomNavigationBarItem(

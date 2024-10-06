@@ -2,7 +2,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 final CollectionReference _courseFireStore =
-FirebaseFirestore.instance.collection("students");
+FirebaseFirestore.instance.collection("courses");
 
 
 //Class Course
@@ -10,8 +10,9 @@ class Course{
   final String _cId;
   String courseName;
   double fees;
+  String aboutCourse;
 
-  Course(this._cId, this.courseName, this.fees);
+  Course(this._cId, this.courseName, this.fees, this.aboutCourse);
 
   // Getter for _cId to allow reading, but not modifying
   String get courseId => _cId;
@@ -21,7 +22,8 @@ class Course{
     return {
       'cId': _cId,
       'courseName': courseName,
-      'fees': fees
+      'fees': fees,
+      'aboutCourse': aboutCourse
     };
   }
 
@@ -31,7 +33,8 @@ class Course{
     return Course(
       data['cId'],
       data['courseName'],
-      data['fees']
+      data['fees'],
+      data['aboutCourse']
     );
   }
 
@@ -51,21 +54,10 @@ class Course{
   }
 
   // Read (Get) courses from Firestore
-  static Future<List<Course>> readStudents() async {
-    List<Course> list = [];
-
-    try {
-      QuerySnapshot snapshot = await _courseFireStore.get();
-      snapshot.docs.forEach((doc) {
-        Course x = fromDocument(doc);
-        list.add(x);
-      });
-    } catch (error) {
-      print('Error reading courses: $error');
-      list = [];
-    }
-
-    return list;
+  static Stream<List<Course>> getCourses() {
+    return _courseFireStore.snapshots().map((snapshot){
+      return snapshot.docs.map((doc) => fromDocument(doc)).toList();
+    });
   }
 
   // Read student by Id
