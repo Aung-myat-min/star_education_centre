@@ -83,8 +83,9 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
   final TextEditingController _phoneCon = TextEditingController();
   final TextEditingController _addressCon = TextEditingController();
   String? _sectionValue;
-  String? _courseValue;
   List<Course> _courseList = []; // List to hold courses
+  List<String> _selectedCourses = []; // List to hold selected course IDs
+  double _totalCourseFees = 0;
 
   final _formKey = GlobalKey<FormState>(); // Key for form validation
 
@@ -103,7 +104,7 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
       });
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        new SnackBar(
+        SnackBar(
           content: Text("Error: $error"),
         ),
       );
@@ -111,10 +112,63 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
     }
   }
 
+  Future<void> _showCourseSelectionDialog() async {
+    // Show dialog with a list of courses
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setStateDialog) {
+            return AlertDialog(
+              title: const Text("Select Courses"),
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: _courseList.map((course) {
+                    return CheckboxListTile(
+                      title: Text(course.courseName),
+                      value: _selectedCourses.contains(course.courseId),
+                      onChanged: (bool? selected) {
+                        setStateDialog(() {
+                          if (selected == true) {
+                            _selectedCourses.add(course.courseId);
+                            setState(() {
+                              _totalCourseFees += course.fees;
+                            });
+                          } else {
+                            _selectedCourses.remove(course.courseId);
+                            setState(() {
+                              _totalCourseFees -= course.fees;
+                            });
+                          }
+                        });
+                      },
+
+                    );
+                  }).toList(),
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text("OK"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   Future<void> registerStudent() async {
     String? currentStudentId;
+
     if (_formKey.currentState!.validate()) {
       var uniqueId = uuid.v1();
+
+      // Create new student object
       Student s1 = Student(
         uniqueId,
         _firstNameCon.text,
@@ -125,60 +179,70 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
         _sectionValue!,
       );
 
+      // Register the student
       Return response = await s1.registerStudent();
       SnackBar snackBar;
+
       if (response.status) {
         snackBar = const SnackBar(
           content: Text("Registered Student!"),
         );
-        currentStudentId = response.data;
+        currentStudentId = response.data;  // Get the student ID after successful registration
       } else {
         snackBar = const SnackBar(
           content: Text("Registration Failed!"),
         );
       }
+
+      // Show the snackbar message
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
-      // Enroll course if selected
-      if (_courseValue != null) {
-        try {
-          final currentCourse = _courseList.firstWhere(
-                (course) => course.courseId == _courseValue,
-            orElse: () => throw Exception('Course not found'),
-          );
+      if (response.status) {
+        // Prepare a Map for the selected courses and their corresponding fees
+        Map<String, double> selectedCoursesMap = {};
 
-          Return response = await enrollCourse(
-            currentStudentId!,
-            currentCourse.courseId,
-            currentCourse.fees,
-          );
+        // Collect the selected courses and their fees into the map
+        for (String courseId in _selectedCourses) {
+          try {
+            final currentCourse = _courseList.firstWhere(
+                  (course) => course.courseId == courseId,
+              orElse: () => throw Exception('Course not found'),
+            );
 
-          if (response.status) {
+            selectedCoursesMap[currentCourse.courseId] = currentCourse.fees;
+          } catch (e) {
+            print('Error finding course: $e');
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Enrolled in course!")),
+              const SnackBar(content: Text("Selected course not found!")),
+            );
+          }
+        }
+
+        // Enroll the student in the selected courses
+        if (selectedCoursesMap.isNotEmpty) {
+          Return enrollmentResponse = await enrollCourses(currentStudentId!, selectedCoursesMap);
+
+          if (enrollmentResponse.status) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Enrolled in courses successfully!")),
             );
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Course Enrollment Failed!")),
+              const SnackBar(content: Text("Course enrollment failed!")),
             );
           }
-        } catch (e) {
-          print('Error finding course: $e');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Selected course not found!"),),
-          );
         }
       }
 
-
+      // Clear the form fields and selected courses after registration and enrollment
       setState(() {
-        _firstNameCon.text = '';
-        _lastNameCon.text = '';
-        _emailCon.text = '';
-        _phoneCon.text = '';
-        _addressCon.text = '';
+        _firstNameCon.clear();
+        _lastNameCon.clear();
+        _emailCon.clear();
+        _phoneCon.clear();
+        _addressCon.clear();
         _sectionValue = null;
-        _courseValue = null;
+        _selectedCourses.clear();
       });
     }
   }
@@ -200,7 +264,6 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
         child: Form(
-          // Wrap the form elements in a Form widget
           key: _formKey,
           child: Column(
             children: [
@@ -321,47 +384,40 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
                       child: ElevatedButton(
                         onPressed: registerStudent,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors
-                              .tealAccent, // Set the background color to tea accent
+                          backgroundColor: Colors.tealAccent,
                         ),
                         child: const Text(
                           'Save',
                           style: TextStyle(fontSize: 20),
-                        ), // Button label
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 30),
-              // Optional course selection
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Optional:'),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                      ),
-                      hint: const Text('Select Course'),
-                      value: _courseValue,
-                      // Selected course value
-                      items: _courseList.map((Course course) {
-                        return DropdownMenuItem<String>(
-                          value: course.courseId, // Use course ID as the value
-                          child: Text(course.courseName), // Display course name
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _courseValue = newValue;
-                        });
-                      },
+                  const Text("Optional:", style: TextStyle(fontSize: 21),),
+                  SizedBox(
+                    height: 50,
+                    width: 200,
+                    child: ElevatedButton(
+                      onPressed: _showCourseSelectionDialog,
+                      child: const Text('Select Courses'),
+                    ),
+                  ),
+                  Text(
+                    'Total: ${_totalCourseFees.toStringAsFixed(2)} MMK', // Display the total fee
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
               ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -369,6 +425,9 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
     );
   }
 }
+
+
+
 
 class _StudentList extends StatefulWidget {
   const _StudentList();

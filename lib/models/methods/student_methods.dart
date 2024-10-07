@@ -5,17 +5,17 @@ import 'package:star_education_centre/models/return.dart';
 import 'package:star_education_centre/models/student.dart';
 
 //return status only
-Future<Return> enrollCourse(
-    String studentId, String courseId, double courseFee) async {
-  Return response = new Return(status: false);
+Future<Return> enrollCourses(
+    String studentId, Map<String, double> courseFeesMap) async {
+  Return response = Return(status: false);
+  bool allEnrollmentsSuccessful = true;
 
   try {
-    final String enId = uuid.v1();
-    final DateTime enrolledT = new DateTime.now();
+    final DateTime enrolledT = DateTime.now();
     final int numberOfCourses = await getNumbersOfEnrollments(studentId)
         .then((response) => response.data);
 
-    // Calculate the discount
+    // Calculate the discount based on the number of enrollments
     final int discount;
     if (numberOfCourses >= 3) {
       discount = RoyalStudent.getDiscount();
@@ -27,20 +27,38 @@ Future<Return> enrollCourse(
       discount = Student.getDiscount();
     }
 
-    //calculating total amount
-    double discountAmount = (courseFee * discount) / 100;
-    double totalFee = courseFee - discountAmount;
+    // Loop through each course and enroll the student
+    for (String courseId in courseFeesMap.keys) {
+      double courseFee = courseFeesMap[courseId]!;
 
-    Enrollment newEnrollment = new Enrollment(
-        enId, discount, enrolledT, totalFee, studentId, courseId);
-    bool status = await newEnrollment.enrollStudent();
-    if (status) {
-      response.status = true;
-    } else {
-      response.status = false;
+      // Calculate the discounted total amount
+      double discountAmount = (courseFee * discount) / 100;
+      double totalFee = courseFee - discountAmount;
+
+      // Generate enrollment ID
+      final String enId = uuid.v1();
+
+      Enrollment newEnrollment = Enrollment(
+        enId,
+        discount,
+        enrolledT,
+        totalFee,
+        studentId,
+        courseId,
+      );
+
+      // Attempt to enroll the student in the course
+      bool status = await newEnrollment.enrollStudent();
+      if (!status) {
+        allEnrollmentsSuccessful = false;
+      }
     }
+
+    // Set the response based on whether all enrollments were successful
+    response.status = allEnrollmentsSuccessful;
+
   } catch (error) {
-    print("Error Enrolling A Course: $error");
+    print("Error Enrolling Courses: $error");
     response.status = false;
   }
   return response;
