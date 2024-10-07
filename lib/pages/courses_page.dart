@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:star_education_centre/constants.dart';
 import 'package:star_education_centre/models/course.dart';
-import 'package:star_education_centre/models/student.dart';
+import 'package:star_education_centre/pages/course_detail_page.dart';
 import 'package:star_education_centre/utils/custom_text_field.dart';
-import 'package:star_education_centre/utils/hoverable_container.dart';
 
 class CoursesPage extends StatefulWidget {
   const CoursesPage({super.key});
@@ -56,7 +55,7 @@ class _CoursesPageState extends State<CoursesPage> {
             children: [
               _CourseRegisterForm(),
               Padding(
-                padding:  EdgeInsets.all(8),
+                padding: EdgeInsets.all(8),
                 child: _CourseList(),
               ),
             ],
@@ -84,22 +83,18 @@ class _CourseRegisterFormState extends State<_CourseRegisterForm> {
   Future<void> createCourse() async {
     if (_formKey.currentState!.validate()) {
       var uniqueId = uuid.v1();
-      Course s1 = Course(
-        uniqueId,
-        _courseName.text,
-         double.parse( _fees.text),
-        _aboutCourse.text
-      );
+      Course s1 = Course(uniqueId, _courseName.text, double.parse(_fees.text),
+          _aboutCourse.text);
 
       bool status = await s1.createCourse();
       SnackBar snackBar;
       if (status) {
         snackBar = const SnackBar(
-          content:  Text("Created a course!"),
+          content: Text("Created a course!"),
         );
       } else {
         snackBar = const SnackBar(
-          content:  Text("Creating course failed!"),
+          content: Text("Creating course failed!"),
         );
       }
       setState(() {
@@ -191,14 +186,12 @@ class _CourseRegisterFormState extends State<_CourseRegisterForm> {
                 ),
               ),
               const SizedBox(height: 30),
-
               SizedBox(
                 height: 50, // Set your desired height
                 child: ElevatedButton(
                   onPressed: createCourse,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors
-                        .tealAccent,
+                    backgroundColor: Colors.tealAccent,
                   ),
                   child: const Text(
                     'Create Course',
@@ -263,7 +256,9 @@ class _CourseListState extends State<_CourseList> {
                     child: CircularProgressIndicator(),
                   );
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No courses found.'));
+                  return const Center(
+                    child: Text('No courses found.'),
+                  );
                 }
 
                 final courses = snapshot.data!.where((course) {
@@ -274,7 +269,8 @@ class _CourseListState extends State<_CourseList> {
                 }).toList();
 
                 if (courses.isEmpty) {
-                  return const Center(child: Text('No courses match your criteria.'));
+                  return const Center(
+                      child: Text('No courses match your criteria.'));
                 }
 
                 return ListView.builder(
@@ -293,8 +289,6 @@ class _CourseListState extends State<_CourseList> {
   }
 }
 
-
-
 class _CourseHoverableContainer extends StatelessWidget {
   final Course course;
 
@@ -302,12 +296,15 @@ class _CourseHoverableContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) {
-        // Optionally implement hover effects
-      },
-      onExit: (_) {
-        // Optionally remove hover effects
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (BuildContext context) =>
+                CourseDetailPage(cId: course.courseId),
+          ),
+        );
       },
       child: Card(
         elevation: 4,
@@ -324,12 +321,8 @@ class _CourseHoverableContainer extends StatelessWidget {
             '${course.fees.toStringAsFixed(2)} MMK',
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-          onTap: () {
-            // Handle tap if needed
-          },
         ),
       ),
     );
   }
 }
-
