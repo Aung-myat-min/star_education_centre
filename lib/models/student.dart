@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:star_education_centre/models/return.dart';
 
 final CollectionReference _studentFireStore =
 FirebaseFirestore.instance.collection("students");
@@ -15,6 +16,8 @@ class Student {
 
   Student(this._sId, this.firstName, this.lastName, this.email, this.phone,
       this.address, this.section);
+
+  static int getDiscount() => 0;
 
   String get studentId => _sId;
 
@@ -46,18 +49,19 @@ class Student {
   }
 
   // Create (Register) a student in Firestore
-  Future<bool> registerStudent() async {
-    bool status = false;
+  Future<Return> registerStudent() async {
+    Return response = new Return(status: false);
 
     try {
       await _studentFireStore.doc(_sId).set(toMap());
-      status = true;
+      response.status = true;
+      response.data = _sId;
     } catch (error) {
       print("Error registering student: $error");
-      status = false;
+      response.status = false;
     }
 
-    return status;
+    return response;
   }
 
   // Read (Get) students from Firestore
@@ -118,7 +122,7 @@ class Student {
 // Subclasses for Registered, Old, and Royal Students remain unchanged.
 class RegisteredStudent extends Student {
   @override
-  num getDiscount() => 5;
+  static int getDiscount() => 5;
 
   RegisteredStudent(super.sId, super.firstName, super.lastName, super.email,
       super.phone, super.address, super.section);
@@ -126,7 +130,7 @@ class RegisteredStudent extends Student {
 
 class OldStudent extends Student {
   @override
-  num getDiscount() => 10;
+  static int getDiscount() => 10;
 
   OldStudent(super.sId, super.firstName, super.lastName, super.email,
       super.phone, super.address, super.section);
@@ -134,7 +138,7 @@ class OldStudent extends Student {
 
 class RoyalStudent extends Student {
   @override
-  num getDiscount() => 20;
+  static int getDiscount() => 20;
 
   RoyalStudent(super.sId, super.firstName, super.lastName, super.email,
       super.phone, super.address, super.section);

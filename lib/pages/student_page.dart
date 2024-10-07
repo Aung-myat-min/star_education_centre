@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:star_education_centre/constants.dart';
+import 'package:star_education_centre/models/course.dart';
+import 'package:star_education_centre/models/methods/student_methods.dart';
+import 'package:star_education_centre/models/return.dart';
 import 'package:star_education_centre/models/student.dart';
 import 'package:star_education_centre/utils/custom_text_field.dart';
 import 'package:star_education_centre/utils/hoverable_container.dart';
@@ -55,7 +58,7 @@ class _StudentPageState extends State<StudentPage> {
             children: [
               _StuRegisterForm(),
               Padding(
-                padding:  EdgeInsets.all(8),
+                padding: EdgeInsets.all(8),
                 child: _StudentList(),
               ),
             ],
@@ -80,10 +83,36 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
   final TextEditingController _phoneCon = TextEditingController();
   final TextEditingController _addressCon = TextEditingController();
   String? _sectionValue;
+  String? _courseValue;
+  List<Course> _courseList = []; // List to hold courses
 
   final _formKey = GlobalKey<FormState>(); // Key for form validation
 
+  @override
+  void initState() {
+    super.initState();
+    _getCourses();
+  }
+
+  Future<void> _getCourses() async {
+    try {
+      Course.getCourses().listen((courses) {
+        setState(() {
+          _courseList = courses;
+        });
+      });
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        new SnackBar(
+          content: Text("Error: $error"),
+        ),
+      );
+      print('Error fetching courses: $error');
+    }
+  }
+
   Future<void> registerStudent() async {
+    String? currentStudentId;
     if (_formKey.currentState!.validate()) {
       var uniqueId = uuid.v1();
       Student s1 = Student(
@@ -96,17 +125,52 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
         _sectionValue!,
       );
 
-      bool status = await s1.registerStudent();
+      Return response = await s1.registerStudent();
       SnackBar snackBar;
-      if (status) {
+      if (response.status) {
         snackBar = const SnackBar(
-          content:  Text("Registered Student!"),
+          content: Text("Registered Student!"),
         );
+        currentStudentId = response.data;
       } else {
         snackBar = const SnackBar(
-          content:  Text("Registered Failed!"),
+          content: Text("Registration Failed!"),
         );
       }
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+      // Enroll course if selected
+      if (_courseValue != null) {
+        try {
+          final currentCourse = _courseList.firstWhere(
+                (course) => course.courseId == _courseValue,
+            orElse: () => throw Exception('Course not found'),
+          );
+
+          Return response = await enrollCourse(
+            currentStudentId!,
+            currentCourse.courseId,
+            currentCourse.fees,
+          );
+
+          if (response.status) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Enrolled in course!")),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Course Enrollment Failed!")),
+            );
+          }
+        } catch (e) {
+          print('Error finding course: $e');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Selected course not found!"),),
+          );
+        }
+      }
+
+
       setState(() {
         _firstNameCon.text = '';
         _lastNameCon.text = '';
@@ -114,8 +178,8 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
         _phoneCon.text = '';
         _addressCon.text = '';
         _sectionValue = null;
+        _courseValue = null;
       });
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
   }
 
@@ -269,6 +333,35 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
                   ),
                 ],
               ),
+              const SizedBox(height: 30),
+              // Optional course selection
+              Row(
+                children: [
+                  const Text('Optional:'),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                      ),
+                      hint: const Text('Select Course'),
+                      value: _courseValue,
+                      // Selected course value
+                      items: _courseList.map((Course course) {
+                        return DropdownMenuItem<String>(
+                          value: course.courseId, // Use course ID as the value
+                          child: Text(course.courseName), // Display course name
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _courseValue = newValue;
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
@@ -349,20 +442,7 @@ class _StudentListState extends State<_StudentList> {
                   return const Center(child: Text('No students found.'));
                 }
 
-                final students = snapshot.data!
-                    .where((student) {
-                  final matchesSearch = '${student.firstName} ${student.lastName}'
-                      .toLowerCase()
-                      .contains(_searchQuery.toLowerCase());
-                  final matchesSection = _selectedSection == null ||
-                      student.section == _selectedSection;
-                  return matchesSearch && matchesSection;
-                })
-                    .toList();
-
-                if (students.isEmpty) {
-                  return const Center(child: Text('No students match your criteria.'));
-                }
+                final students = snapshot.data!;
 
                 return GridView.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -375,8 +455,7 @@ class _StudentListState extends State<_StudentList> {
                   itemBuilder: (BuildContext context, int index) {
                     final student = students[index];
                     return SelectionArea(
-                      child: HoverableContainer(student: student)
-                    );
+                        child: HoverableContainer(student: student));
                   },
                 );
               },

@@ -33,11 +33,13 @@ class Enrollment {
   //method to create enrollment object from doc
   static Enrollment fromDocument(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
+    final Timestamp timestamp = data['enrolledT'] as Timestamp;
+    final DateTime enrolledDateTime = timestamp.toDate();
 
     return Enrollment(
       data['enId'],
-      data['enrolledT'],
       data['discount'],
+      enrolledDateTime,
       data['totalFee'],
       data['studentId'],
       data['courseId'],
@@ -78,7 +80,7 @@ class Enrollment {
   }
 
   // Read enrollment by Id
-  static Future<Enrollment?> readStudentById(String enId) async {
+  static Future<Enrollment?> readEnrollementById(String enId) async {
     try {
       QuerySnapshot snapshot =
           await _enrollmentFireStore.where('enId', isEqualTo: enId).get();
@@ -94,8 +96,20 @@ class Enrollment {
     }
   }
 
+  static Stream<List<Enrollment>> getEnrollmentByStudent(String studentId) {
+    return _enrollmentFireStore
+        .where('studentId', isEqualTo: studentId)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        return Enrollment.fromDocument(doc);
+      }).toList();
+    });
+  }
+
+
   // Update a enrollment in Firestore
-  Future<bool> updateStudent() async {
+  Future<bool> updateEnrollment() async {
     bool status = false;
 
     try {
@@ -110,7 +124,7 @@ class Enrollment {
   }
 
   // Delete a enrollment from Firestore
-  Future<bool> deleteStudent() async {
+  Future<bool> deleteEnrollment() async {
     bool status = false;
 
     try {

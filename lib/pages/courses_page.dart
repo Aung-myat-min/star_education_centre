@@ -321,7 +321,7 @@ class _CourseHoverableContainer extends StatelessWidget {
             style: const TextStyle(fontSize: 14),
           ),
           trailing: Text(
-            '\$${course.fees.toStringAsFixed(2)}',
+            '${course.fees.toStringAsFixed(2)} MMK',
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           onTap: () {
