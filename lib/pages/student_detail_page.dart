@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:star_education_centre/models/course.dart';
 import 'package:star_education_centre/models/enrollment.dart';
+import 'package:star_education_centre/models/return.dart';
 import 'package:star_education_centre/models/student.dart'; // Assuming you have a Student model or service
 import 'package:star_education_centre/utils/custom_text_field.dart';
+
+import '../models/methods/student_methods.dart';
 
 class StudentDetailPage extends StatefulWidget {
   const StudentDetailPage({super.key, required this.sId});
@@ -23,6 +26,9 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
   final TextEditingController _addressCon = TextEditingController();
   String? _sectionValue;
   bool readOnly = true;
+  List<Course> _courseList = [];
+  List<String> _selectedCourses = []; // List to hold selected course IDs
+  Stream<List<Enrollment>>? _enrollments;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -30,6 +36,8 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
   void initState() {
     super.initState();
     _fetchStudentInfo(); // Fetch student info on page load
+    _getCourses();
+    _enrollments = Enrollment.getEnrollmentByStudent(widget.sId);
   }
 
   Future<void> _updateStudentInfo() async {
@@ -113,6 +121,139 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
       );
     }
   }
+
+  Future<void> _getCourses() async {
+    try {
+      Course.getCourses().listen((courses) {
+        setState(() {
+          _courseList = courses;
+        });
+      });
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error: $error"),
+        ),
+      );
+      print('Error fetching courses: $error');
+    }
+  }
+
+  Future<void> _enrollCourseDialog() async {
+    // Fetch the student's current enrollments
+    final List<Enrollment> enrollments = await Enrollment.getEnrollmentByStudent(widget.sId).first;
+
+    // Extract the course IDs of already enrolled courses
+    List<String> enrolledCourseIds = enrollments.map((enrollment) => enrollment.courseId).toList();
+
+    // Filter out already enrolled courses from the course list
+    List<Course> availableCourses = _courseList.where((course) => !enrolledCourseIds.contains(course.courseId)).toList();
+
+    double totalCourseFees = 0;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setStateDialog) {
+            return AlertDialog(
+              title: const Text('Add New Enrollment'),
+              content: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    ListBody(
+                      children: availableCourses.map(
+                            (course) {
+                          return CheckboxListTile(
+                            title: Text(course.courseName),
+                            value: _selectedCourses.contains(course.courseId),
+                            onChanged: (bool? selected) {
+                              setStateDialog(
+                                    () {
+                                  if (selected == true) {
+                                    _selectedCourses.add(course.courseId);
+                                    setState(() {
+                                      totalCourseFees += course.fees;
+                                    });
+                                  } else {
+                                    _selectedCourses.remove(course.courseId);
+                                    setState(() {
+                                      totalCourseFees -= course.fees;
+                                    });
+                                  }
+                                },
+                              );
+                            },
+                          );
+                        },
+                      ).toList(),
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    Text(
+                      "Total Fees: $totalCourseFees MMK",
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    _enrollCourse();
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Enroll'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+
+  Future<void> _enrollCourse() async {
+    Map<String, double> selectedCoursesMap = {};
+
+    // Populate the map with selected courses and their fees
+    for (var courseId in _selectedCourses) {
+      Course? selectedCourse = _courseList.firstWhere(
+            (course) => course.courseId == courseId,
+      );
+
+      if (selectedCourse != null) {
+        selectedCoursesMap[courseId] = selectedCourse.fees;
+      }
+    }
+
+    // Proceed only if there are selected courses
+    if (selectedCoursesMap.isNotEmpty) {
+      Return enrollmentResponse = await enrollCourses(widget.sId, selectedCoursesMap);
+
+      if (enrollmentResponse.status) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Enrolled in courses successfully!")),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Course enrollment failed!")),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No courses selected!")),
+      );
+    }
+  }
+
 
   @override
   void dispose() {
@@ -315,10 +456,21 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
                 const SizedBox(
                   height: 30,
                 ),
-                _enrolledCourses(studentId: widget.sId)
+                _enrolledCourses(studentId: widget.sId, enrollments: _enrollments!,)
               ],
             ),
           ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _enrollCourseDialog,
+        backgroundColor: Colors.tealAccent,
+        // Set the background color to teal accent
+        shape: const CircleBorder(),
+        // Rounded shape for the icon
+        child: const Icon(
+          Icons.add,
+          color: Colors.black, // Set the icon color to make it stand out
         ),
       ),
     );
@@ -327,8 +479,8 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
 
 class _enrolledCourses extends StatefulWidget {
   final String studentId;
-
-  const _enrolledCourses({super.key, required this.studentId});
+  final Stream<List<Enrollment>> enrollments;
+  const _enrolledCourses({super.key, required this.studentId, required this.enrollments});
 
   @override
   State<_enrolledCourses> createState() => _enrolledCoursesState();
@@ -338,7 +490,7 @@ class _enrolledCoursesState extends State<_enrolledCourses> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<Enrollment>>(
-      stream: Enrollment.getEnrollmentByStudent(widget.studentId),
+      stream: widget.enrollments,
       // Get enrollments by student ID
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
