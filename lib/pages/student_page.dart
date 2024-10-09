@@ -409,7 +409,6 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
                   ),
                   SizedBox(
                     height: 50,
-                    width: 200,
                     child: ElevatedButton(
                       onPressed: _showCourseSelectionDialog,
                       child: const Text('Select Courses'),
@@ -442,10 +441,25 @@ class _StudentList extends StatefulWidget {
 }
 
 class _StudentListState extends State<_StudentList> {
-  String _searchQuery = '';
-  String? _selectedSection;
+  String _searchQuery = ''; // For name and ID search
+  String? _selectedSection; // For section filter
 
-  final List<String> _sections = ['A', 'B', 'C', 'D'];
+  final List<String> _sections = ['A', 'B', 'C', 'D']; // Sections for dropdown
+
+  // Method to filter students by name, ID, and section
+  List<Student> _filterStudents(List<Student> students) {
+    return students.where((student) {
+      final isSectionMatch =
+          _selectedSection == null || student.section == _selectedSection;
+      final isSearchQueryMatch = student.firstName
+              .toLowerCase()
+              .contains(_searchQuery.toLowerCase()) ||
+          student.lastName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          student.studentId.toLowerCase().contains(_searchQuery.toLowerCase());
+
+      return isSectionMatch && isSearchQueryMatch;
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -459,11 +473,11 @@ class _StudentListState extends State<_StudentList> {
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
-                // Name Search Field
+                // Name or ID Search Field
                 Expanded(
                   child: TextField(
                     decoration: const InputDecoration(
-                      labelText: 'Search by Name',
+                      labelText: 'Search by Name or ID',
                       border: OutlineInputBorder(),
                     ),
                     onChanged: (value) {
@@ -496,7 +510,7 @@ class _StudentListState extends State<_StudentList> {
           SizedBox(
             height: 300,
             child: StreamBuilder<List<Student>>(
-              stream: Student.readStudents(),
+              stream: Student.readStudents(), // Your stream of students
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
@@ -508,8 +522,16 @@ class _StudentListState extends State<_StudentList> {
                   );
                 }
 
-                final students = snapshot.data!;
+                // Filter students based on search query and selected section
+                final filteredStudents = _filterStudents(snapshot.data!);
 
+                if (filteredStudents.isEmpty) {
+                  return const Center(
+                    child: Text('No students match the search criteria.'),
+                  );
+                }
+
+                // Display filtered students
                 return GridView.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
@@ -517,9 +539,9 @@ class _StudentListState extends State<_StudentList> {
                     mainAxisSpacing: 8,
                     childAspectRatio: 1,
                   ),
-                  itemCount: students.length,
+                  itemCount: filteredStudents.length,
                   itemBuilder: (BuildContext context, int index) {
-                    final student = students[index];
+                    final student = filteredStudents[index];
                     return SelectionArea(
                       child: HoverableContainer(student: student),
                     );

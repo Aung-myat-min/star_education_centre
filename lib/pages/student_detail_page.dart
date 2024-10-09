@@ -296,193 +296,195 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
       appBar: AppBar(
         title: const Text('Student Details'),
       ),
-      body: SizedBox(
-        width: double.infinity,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                const Text(
-                  'Student Info!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
+      body: SingleChildScrollView(
+        child: SizedBox(
+          width: double.infinity,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  const Text(
+                    'Student Info!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 30),
-                Row(
-                  children: [
-                    Expanded(
-                      child: CustomTextField(
-                        readonly: readOnly,
-                        controller: _firstNameCon,
-                        hintText: 'First Name',
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your first name';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: CustomTextField(
-                        readonly: readOnly,
-                        controller: _lastNameCon,
-                        hintText: 'Last Name',
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your last name';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 30),
-                Row(
-                  children: [
-                    Expanded(
-                      child: CustomTextField(
-                        readonly: readOnly,
-                        controller: _emailCon,
-                        hintText: 'Email',
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your email';
-                          } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
-                              .hasMatch(value)) {
-                            return 'Please enter a valid email';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: CustomTextField(
-                        readonly: readOnly,
-                        controller: _phoneCon,
-                        hintText: 'Phone Number',
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your phone number';
-                          } else if (value.length < 10) {
-                            return 'Phone number must be at least 10 digits';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 30),
-                SizedBox(
-                  width: double.infinity,
-                  child: CustomTextField(
-                    readonly: readOnly,
-                    controller: _addressCon,
-                    hintText: 'Address',
-                    minLines: 2,
-                    maxLines: 4,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your address';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(height: 30),
-                Row(
-                  children: [
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
+                  const SizedBox(height: 30),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CustomTextField(
+                          readonly: readOnly,
+                          controller: _firstNameCon,
+                          hintText: 'First Name',
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your first name';
+                            }
+                            return null;
+                          },
                         ),
-                        hint: const Text('Select Section'),
-                        value: _sectionValue,
-                        // Preselect value
-                        items: ['A', 'B', 'C', 'D'].map((String section) {
-                          return DropdownMenuItem<String>(
-                            value: section,
-                            child: Text(section),
-                          );
-                        }).toList(),
-                        onChanged: readOnly
-                            ? null // Disable if readonly
-                            : (String? newValue) {
-                                setState(() {
-                                  _sectionValue = newValue;
-                                });
-                              },
                       ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: CustomTextField(
+                          readonly: readOnly,
+                          controller: _lastNameCon,
+                          hintText: 'Last Name',
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your last name';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 30),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CustomTextField(
+                          readonly: readOnly,
+                          controller: _emailCon,
+                          hintText: 'Email',
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your email';
+                            } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                                .hasMatch(value)) {
+                              return 'Please enter a valid email';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: CustomTextField(
+                          readonly: readOnly,
+                          controller: _phoneCon,
+                          hintText: 'Phone Number',
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your phone number';
+                            } else if (value.length < 10) {
+                              return 'Phone number must be at least 10 digits';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 30),
+                  SizedBox(
+                    width: double.infinity,
+                    child: CustomTextField(
+                      readonly: readOnly,
+                      controller: _addressCon,
+                      hintText: 'Address',
+                      minLines: 2,
+                      maxLines: 4,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your address';
+                        }
+                        return null;
+                      },
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: SizedBox(
-                        height: 50,
+                  ),
+                  const SizedBox(height: 30),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                          ),
+                          hint: const Text('Select Section'),
+                          value: _sectionValue,
+                          // Preselect value
+                          items: ['A', 'B', 'C', 'D'].map((String section) {
+                            return DropdownMenuItem<String>(
+                              value: section,
+                              child: Text(section),
+                            );
+                          }).toList(),
+                          onChanged: readOnly
+                              ? null // Disable if readonly
+                              : (String? newValue) {
+                                  setState(() {
+                                    _sectionValue = newValue;
+                                  });
+                                },
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: SizedBox(
+                          height: 50,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                readOnly = !readOnly;
+                                if (readOnly) {
+                                  print("object");
+                                  _updateStudentInfo();
+                                }
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.tealAccent,
+                            ),
+                            child: Text(
+                              readOnly == true ? 'Edit' : 'Save',
+                              style: const TextStyle(fontSize: 20),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
                         child: ElevatedButton(
                           onPressed: () {
-                            setState(() {
-                              readOnly = !readOnly;
-                              if (readOnly) {
-                                print("object");
-                                _updateStudentInfo();
-                              }
-                            });
+                            _deleteStudent();
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.tealAccent,
+                            backgroundColor: Colors.redAccent,
                           ),
-                          child: Text(
-                            readOnly == true ? 'Edit' : 'Save',
-                            style: const TextStyle(fontSize: 20),
+                          child: const Text(
+                            'Delete',
+                            style: TextStyle(fontSize: 20),
                           ),
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 30,
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          _deleteStudent();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.redAccent,
-                        ),
-                        child: const Text(
-                          'Delete',
-                          style: TextStyle(fontSize: 20),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-                const SizedBox(
-                  height: 30,
-                ),
-                const Text(
-                  "Enrolled Courses",
-                  style: TextStyle(fontSize: 30),
-                ),
-                const SizedBox(
-                  height: 30,
-                ),
-                _enrolledCourses(studentId: widget.sId, enrollments: _enrollments!,)
-              ],
+                      )
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  const Text(
+                    "Enrolled Courses",
+                    style: TextStyle(fontSize: 30),
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  _enrolledCourses(studentId: widget.sId, enrollments: _enrollments!,)
+                ],
+              ),
             ),
           ),
         ),

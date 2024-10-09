@@ -63,18 +63,20 @@ class _HoverableContainerState extends State<HoverableContainer> {
             children: [
               const CircleAvatar(
                 backgroundColor: Colors.white,
-                radius: 30,
+                radius: 20,
                 child: Icon(Icons.person, size: 30, color: Colors.teal),
               ),
               const SizedBox(height: 10),
-              Text(
-                '${widget.student.firstName} ${widget.student.lastName}',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+              FittedBox(
+                child: Text(
+                  '${widget.student.firstName} ${widget.student.lastName}',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(

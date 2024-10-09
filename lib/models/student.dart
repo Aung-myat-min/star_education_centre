@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:star_education_centre/models/return.dart';
 
 final CollectionReference _studentFireStore =
-FirebaseFirestore.instance.collection("students");
+    FirebaseFirestore.instance.collection("students");
 
 // Student Class
 class Student {
@@ -36,26 +36,47 @@ class Student {
     };
   }
 
+  static Future<Return> getTotalStudentNumber() async {
+    Return response = Return(status: false);
+
+    try {
+      AggregateQuery query = _studentFireStore.count();
+
+      // Execute the count query
+      AggregateQuerySnapshot snapshot = await query.get();
+
+      // Assign the count result to the response
+      response.status = true;
+      response.data = snapshot.count; // The number of documents (students)
+    } catch (error) {
+      print('Error $error');
+      response.error = true;
+      response.data = error; // Assign the error to the response
+      rethrow;
+    }
+
+    return response;
+  }
+
   // Static method to create a Student object from Firestore data
   static Student fromDocument(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     final Timestamp startDate = data['startDate'] as Timestamp;
 
     return Student(
-      data['sId'],
-      data['firstName'],
-      data['lastName'],
-      data['email'],
-      data['phone'],
-      data['address'],
-      data['section'],
-      startDate
-    );
+        data['sId'],
+        data['firstName'],
+        data['lastName'],
+        data['email'],
+        data['phone'],
+        data['address'],
+        data['section'],
+        startDate);
   }
 
   // Create (Register) a student in Firestore
   Future<Return> registerStudent() async {
-    Return response =  Return(status: false);
+    Return response = Return(status: false);
 
     try {
       await _studentFireStore.doc(_sId).set(toMap());
@@ -80,7 +101,7 @@ class Student {
   static Future<Student?> readStudentById(String sId) async {
     try {
       QuerySnapshot snapshot =
-      await _studentFireStore.where('sId', isEqualTo: sId).get();
+          await _studentFireStore.where('sId', isEqualTo: sId).get();
 
       if (snapshot.docs.isNotEmpty) {
         return fromDocument(snapshot.docs.first);

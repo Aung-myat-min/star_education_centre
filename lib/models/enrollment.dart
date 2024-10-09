@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:star_education_centre/models/course.dart';
+import 'package:star_education_centre/models/return.dart';
 
 final CollectionReference _enrollmentFireStore =
     FirebaseFirestore.instance.collection('enrollments');
@@ -46,11 +48,74 @@ class Enrollment {
     );
   }
 
+  // Method to get the 3 most popular courses
+  static Future<List<Map<String, dynamic>>> getMostPopularCourses() async {
+    try {
+      QuerySnapshot snapshot = await _enrollmentFireStore.get();
+      Map<String, int> courseEnrollmentCount = {};
+
+      // Count enrollments for each course
+      for (var doc in snapshot.docs) {
+        Enrollment enrollment = fromDocument(doc);
+        courseEnrollmentCount[enrollment.courseId] =
+            (courseEnrollmentCount[enrollment.courseId] ?? 0) + 1;
+      }
+
+      // Sort courses by the number of enrollments in descending order
+      var sortedCourses = courseEnrollmentCount.entries.toList()
+        ..sort((a, b) => b.value.compareTo(a.value));
+
+      // Take the top 3 courses
+      List<Map<String, dynamic>> topCourses = [];
+
+      for (var entry in sortedCourses.take(3)) {
+        String courseId = entry.key;
+        Course? course = await Course.readCourseById(courseId);
+        if (course != null) {
+          topCourses.add({
+            'courseName': course.courseName,
+            'price': course.fees.toString(),
+            'enrollments': entry.value, // Number of enrollments
+          });
+        }
+      }
+
+      return topCourses;
+    } catch (error) {
+      print('Error finding most popular courses: $error');
+      return [];
+    }
+  }
+
+  static Future<Return> getTotalEnrollmentsNumber() async {
+    Return response = Return(status: false);
+
+    try {
+      AggregateQuery query = _enrollmentFireStore.count();
+
+      // Execute the count query
+      AggregateQuerySnapshot snapshot = await query.get();
+
+      // Assign the count result to the response
+      response.status = true;
+      response.data = snapshot.count; // The number of documents (students)
+    } catch (error) {
+      print('Error $error');
+      response.error = true;
+      response.data = error; // Assign the error to the response
+      rethrow;
+    }
+
+    return response;
+  }
+
   static Stream<List<Enrollment>> getEnrollmentByCourseAndDate(
       String courseId, DateTime date) {
     // Create timestamps for the start and end of the day
-    Timestamp startDate = Timestamp.fromDate(DateTime(date.year, date.month, date.day, 0, 0, 0)); // Start of the day
-    Timestamp endDate = Timestamp.fromDate(DateTime(date.year, date.month, date.day, 23, 59, 59)); // End of the day
+    Timestamp startDate = Timestamp.fromDate(
+        DateTime(date.year, date.month, date.day, 0, 0, 0)); // Start of the day
+    Timestamp endDate = Timestamp.fromDate(DateTime(
+        date.year, date.month, date.day, 23, 59, 59)); // End of the day
 
     print('Course ID: $courseId, Date: $date');
     return _enrollmentFireStore

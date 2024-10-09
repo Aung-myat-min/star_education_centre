@@ -1,12 +1,11 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:star_education_centre/models/return.dart';
 
 final CollectionReference _courseFireStore =
-FirebaseFirestore.instance.collection("courses");
-
+    FirebaseFirestore.instance.collection("courses");
 
 //Class Course
-class Course{
+class Course {
   final String _cId;
   String courseName;
   double fees;
@@ -18,7 +17,7 @@ class Course{
   String get courseId => _cId;
 
   // Method to convert a Student object to a Map (for Firestore)
-  Map<String, dynamic> toMap(){
+  Map<String, dynamic> toMap() {
     return {
       'cId': _cId,
       'courseName': courseName,
@@ -28,14 +27,32 @@ class Course{
   }
 
   // Static method to create a Course object from Firestore data
-  static Course fromDocument(DocumentSnapshot doc){
+  static Course fromDocument(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return Course(
-      data['cId'],
-      data['courseName'],
-      data['fees'],
-      data['aboutCourse']
-    );
+        data['cId'], data['courseName'], data['fees'], data['aboutCourse']);
+  }
+
+  static Future<Return> getTotalCourseNumber() async {
+    Return response = Return(status: false);
+
+    try {
+      AggregateQuery query = _courseFireStore.count();
+
+      // Execute the count query
+      AggregateQuerySnapshot snapshot = await query.get();
+
+      // Assign the count result to the response
+      response.status = true;
+      response.data = snapshot.count; // The number of documents (students)
+    } catch (error) {
+      print('Error $error');
+      response.error = true;
+      response.data = error; // Assign the error to the response
+      rethrow;
+    }
+
+    return response;
   }
 
   // Create (Register) a course in Firestore
@@ -55,7 +72,7 @@ class Course{
 
   // Read (Get) courses from Firestore
   static Stream<List<Course>> getCourses() {
-    return _courseFireStore.snapshots().map((snapshot){
+    return _courseFireStore.snapshots().map((snapshot) {
       return snapshot.docs.map((doc) => fromDocument(doc)).toList();
     });
   }
@@ -64,7 +81,7 @@ class Course{
   static Future<Course?> readCourseById(String cId) async {
     try {
       QuerySnapshot snapshot =
-      await _courseFireStore.where('cId', isEqualTo: cId).get();
+          await _courseFireStore.where('cId', isEqualTo: cId).get();
 
       if (snapshot.docs.isNotEmpty) {
         return fromDocument(snapshot.docs.first);
