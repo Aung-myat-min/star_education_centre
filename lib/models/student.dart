@@ -13,9 +13,10 @@ class Student {
   String phone;
   String address;
   String section;
+  Timestamp startDate;
 
   Student(this._sId, this.firstName, this.lastName, this.email, this.phone,
-      this.address, this.section);
+      this.address, this.section, this.startDate);
 
   static int getDiscount() => 0;
 
@@ -31,12 +32,15 @@ class Student {
       'phone': phone,
       'address': address,
       'section': section,
+      'startDate': startDate
     };
   }
 
   // Static method to create a Student object from Firestore data
   static Student fromDocument(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
+    final Timestamp startDate = data['startDate'] as Timestamp;
+
     return Student(
       data['sId'],
       data['firstName'],
@@ -45,12 +49,13 @@ class Student {
       data['phone'],
       data['address'],
       data['section'],
+      startDate
     );
   }
 
   // Create (Register) a student in Firestore
   Future<Return> registerStudent() async {
-    Return response = new Return(status: false);
+    Return response =  Return(status: false);
 
     try {
       await _studentFireStore.doc(_sId).set(toMap());
@@ -124,19 +129,19 @@ class RegisteredStudent extends Student {
   static int getDiscount() => 5;
 
   RegisteredStudent(super.sId, super.firstName, super.lastName, super.email,
-      super.phone, super.address, super.section);
+      super.phone, super.address, super.section, super.startDate);
 }
 
 class OldStudent extends Student {
   static int getDiscount() => 10;
 
   OldStudent(super.sId, super.firstName, super.lastName, super.email,
-      super.phone, super.address, super.section);
+      super.phone, super.address, super.section, super.startDate);
 }
 
 class RoyalStudent extends Student {
   static int getDiscount() => 20;
 
   RoyalStudent(super.sId, super.firstName, super.lastName, super.email,
-      super.phone, super.address, super.section);
+      super.phone, super.address, super.section, super.startDate);
 }

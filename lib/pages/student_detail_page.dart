@@ -1,5 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:star_education_centre/models/course.dart';
 import 'package:star_education_centre/models/enrollment.dart';
 import 'package:star_education_centre/models/return.dart';
@@ -25,9 +25,12 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
   final TextEditingController _phoneCon = TextEditingController();
   final TextEditingController _addressCon = TextEditingController();
   String? _sectionValue;
+  Timestamp? _startDate;
+
+  //page transition associated
   bool readOnly = true;
   List<Course> _courseList = [];
-  final List<String> _selectedCourses = []; // List to hold selected course IDs
+  List<String> _selectedCourses = []; // List to hold selected course IDs
   Stream<List<Enrollment>>? _enrollments;
   int discount = 0;
 
@@ -43,14 +46,17 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
 
   Future<void> _updateStudentInfo() async {
     try {
-      Student s1 = new Student(
+      Student s1 = Student(
           widget.sId,
           _firstNameCon.text,
           _lastNameCon.text,
           _emailCon.text,
           _phoneCon.text,
           _addressCon.text,
-          _sectionValue!);
+          _sectionValue!,
+        _startDate!
+
+      );
       bool status = await s1.updateStudent();
 
       SnackBar snackBar;
@@ -90,6 +96,7 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
           _phoneCon.text = student.phone;
           _addressCon.text = student.address;
           _sectionValue = student.section;
+          _startDate = student.startDate;
         });
       }
     } catch (e) {
@@ -237,6 +244,7 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
       Return enrollmentResponse = await enrollCourses(widget.sId, selectedCoursesMap);
 
       if (enrollmentResponse.status) {
+        _selectedCourses = [];
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Enrolled in courses successfully!")),
         );
@@ -574,31 +582,24 @@ class _enrolledCoursesState extends State<_enrolledCourses> {
                   ],
                 ),
                 // Table Rows for enrollments
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: enrollments.length,
-                  itemBuilder: (context, index) {
-                    final enrollment = enrollments[index];
-
+                Column(
+                  children: enrollments.map((enrollment) {
                     return FutureBuilder<Course?>(
                       future: Course.readCourseById(enrollment.courseId),
                       builder: (context, courseSnapshot) {
-                        if (courseSnapshot.connectionState ==
-                            ConnectionState.waiting) {
+                        if (courseSnapshot.connectionState == ConnectionState.waiting) {
                           return const Text("Loading..."); // Custom widget to show loading row
                         } else if (courseSnapshot.hasError) {
-                          return const Text("Error Loading", style: TextStyle(color: Colors.red),); // Custom widget to show error row
+                          return const Text("Error Loading", style: TextStyle(color: Colors.red)); // Custom widget to show error row
                         }
 
                         final course = courseSnapshot.data;
                         if (course == null) {
-                          return const Text("Error Loading", style: TextStyle(color: Colors.red),); // Custom widget for unknown course
+                          return const Text("Error Loading", style: TextStyle(color: Colors.red)); // Custom widget for unknown course
                         }
 
                         // Calculate total cost after discount
-                        num discount = enrollment.discount ?? 0.0;
-                        double discountedCost = enrollment.totalFee - discount;
+                        double discountedCost = course.fees - (course.fees * (enrollment.discount / 100));
 
                         return Table(
                           border: TableBorder.all(color: Colors.black, width: 1),
@@ -643,7 +644,7 @@ class _enrolledCoursesState extends State<_enrolledCourses> {
                         );
                       },
                     );
-                  },
+                  }).toList(),
                 ),
               ],
             ),

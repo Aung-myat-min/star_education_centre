@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:star_education_centre/constants.dart';
 import 'package:star_education_centre/models/course.dart';
@@ -167,6 +168,7 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
 
     if (_formKey.currentState!.validate()) {
       var uniqueId = uuid.v1();
+      final DateTime startDate = DateTime.now();
 
       // Create new student object
       Student s1 = Student(
@@ -177,6 +179,7 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
         _phoneCon.text,
         _addressCon.text,
         _sectionValue!,
+        Timestamp.fromDate(startDate)
       );
 
       // Register the student
