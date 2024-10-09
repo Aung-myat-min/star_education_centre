@@ -34,8 +34,19 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Star Education Centre',
       theme: ThemeData(
+        scaffoldBackgroundColor: Colors.blue.shade50,
         fontFamily: 'BarlowBlack',
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.tealAccent),
+        colorScheme: ColorScheme(
+          primary: Colors.blue.shade800,
+          secondary: Colors.yellow.shade700,
+          surface: Colors.white,
+          error: Colors.red.shade400,
+          onPrimary: Colors.white,
+          onSecondary: Colors.black,
+          onSurface: Colors.black87,
+          onError: Colors.white,
+          brightness: Brightness.light,
+        ),
         useMaterial3: true,
       ),
       routes: routes,
@@ -44,3 +55,4 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+

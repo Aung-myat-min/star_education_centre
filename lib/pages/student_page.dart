@@ -143,7 +143,6 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
                           }
                         });
                       },
-
                     );
                   }).toList(),
                 ),
@@ -172,15 +171,14 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
 
       // Create new student object
       Student s1 = Student(
-        uniqueId,
-        _firstNameCon.text,
-        _lastNameCon.text,
-        _emailCon.text,
-        _phoneCon.text,
-        _addressCon.text,
-        _sectionValue!,
-        Timestamp.fromDate(startDate)
-      );
+          uniqueId,
+          _firstNameCon.text,
+          _lastNameCon.text,
+          _emailCon.text,
+          _phoneCon.text,
+          _addressCon.text,
+          _sectionValue!,
+          Timestamp.fromDate(startDate));
 
       // Register the student
       Return response = await s1.registerStudent();
@@ -190,7 +188,8 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
         snackBar = const SnackBar(
           content: Text("Registered Student!"),
         );
-        currentStudentId = response.data;  // Get the student ID after successful registration
+        currentStudentId =
+            response.data; // Get the student ID after successful registration
       } else {
         snackBar = const SnackBar(
           content: Text("Registration Failed!"),
@@ -208,7 +207,7 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
         for (String courseId in _selectedCourses) {
           try {
             final currentCourse = _courseList.firstWhere(
-                  (course) => course.courseId == courseId,
+              (course) => course.courseId == courseId,
               orElse: () => throw Exception('Course not found'),
             );
 
@@ -223,11 +222,13 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
 
         // Enroll the student in the selected courses
         if (selectedCoursesMap.isNotEmpty) {
-          Return enrollmentResponse = await enrollCourses(currentStudentId!, selectedCoursesMap);
+          Return enrollmentResponse =
+              await enrollCourses(currentStudentId!, selectedCoursesMap);
 
           if (enrollmentResponse.status) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Enrolled in courses successfully!")),
+              const SnackBar(
+                  content: Text("Enrolled in courses successfully!")),
             );
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -402,7 +403,10 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("Optional:", style: TextStyle(fontSize: 21),),
+                  const Text(
+                    "Optional:",
+                    style: TextStyle(fontSize: 21),
+                  ),
                   SizedBox(
                     height: 50,
                     width: 200,
@@ -412,7 +416,8 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
                     ),
                   ),
                   Text(
-                    'Total: ${_totalCourseFees.toStringAsFixed(2)} MMK', // Display the total fee
+                    'Total: ${_totalCourseFees.toStringAsFixed(2)} MMK',
+                    // Display the total fee
                     style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
@@ -428,9 +433,6 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
     );
   }
 }
-
-
-
 
 class _StudentList extends StatefulWidget {
   const _StudentList();
@@ -501,14 +503,16 @@ class _StudentListState extends State<_StudentList> {
                     child: CircularProgressIndicator(),
                   );
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No students found.'));
+                  return const Center(
+                    child: Text('No students found.'),
+                  );
                 }
 
                 final students = snapshot.data!;
 
                 return GridView.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
+                    crossAxisCount: 3,
                     crossAxisSpacing: 8,
                     mainAxisSpacing: 8,
                     childAspectRatio: 1,
@@ -517,7 +521,8 @@ class _StudentListState extends State<_StudentList> {
                   itemBuilder: (BuildContext context, int index) {
                     final student = students[index];
                     return SelectionArea(
-                        child: HoverableContainer(student: student));
+                      child: HoverableContainer(student: student),
+                    );
                   },
                 );
               },

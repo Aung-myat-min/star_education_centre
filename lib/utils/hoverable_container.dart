@@ -3,7 +3,7 @@ import 'package:star_education_centre/models/student.dart';
 import 'package:star_education_centre/pages/student_detail_page.dart';
 
 class HoverableContainer extends StatefulWidget {
-  final Student student; // Assuming 'student' is a class instance
+  final Student student;
 
   const HoverableContainer({super.key, required this.student});
 
@@ -29,16 +29,21 @@ class _HoverableContainerState extends State<HoverableContainer> {
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.all(12),
+        constraints: BoxConstraints(
+          minWidth: MediaQuery.of(context).size.width * 0.4, // Responsive width
+        ),
         decoration: BoxDecoration(
-          color: Colors.teal.shade400,
-          borderRadius: BorderRadius.circular(10),
+          color: _isHovered ? Colors.teal.shade300 : Colors.teal.shade400,
+          borderRadius: BorderRadius.circular(12),
           boxShadow: _isHovered
               ? [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.2),
-                    spreadRadius: 3,
-                    blurRadius: 10,
-                    offset: const Offset(0, 3), // changes position of shadow
+                    spreadRadius: 4,
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
                   ),
                 ]
               : [],
@@ -53,40 +58,46 @@ class _HoverableContainerState extends State<HoverableContainer> {
               ),
             );
           },
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'ID: ${widget.student.studentId}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircleAvatar(
+                backgroundColor: Colors.white,
+                radius: 30,
+                child: Icon(Icons.person, size: 30, color: Colors.teal),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                '${widget.student.firstName} ${widget.student.lastName}',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Name: ${widget.student.firstName} ${widget.student.lastName}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
-                  textAlign: TextAlign.center,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                widget.student.phone,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.white70,
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Phone: ${widget.student.phone}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(
+                height: 14,
+                child: _isHovered
+                    ? const Text(
+                        "Tap to view details",
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
+                      )
+                    : Container(),
+              ),
+            ],
           ),
         ),
       ),
