@@ -6,10 +6,10 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Example data
-    final int totalStudents = 150;
-    final int totalCourses = 12;
-    final int totalEnrollments = 320;
-    final String mostEnrolledCourse = "Introduction to Flutter";
+    const int totalStudents = 150;
+    const int totalCourses = 12;
+    const int totalEnrollments = 320;
+    const String mostEnrolledCourse = "Introduction to Flutter";
 
     return Scaffold(
       appBar: AppBar(

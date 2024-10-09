@@ -86,10 +86,10 @@ class Enrollment {
 
     try {
       QuerySnapshot snapshot = await _enrollmentFireStore.get();
-      snapshot.docs.forEach((doc) {
+      for (var doc in snapshot.docs) {
         Enrollment x = fromDocument(doc);
         list.add(x);
-      });
+      }
     } catch (error) {
       print('Error reading enrollments: $error');
       list = [];

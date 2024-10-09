@@ -72,7 +72,7 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        new SnackBar(
+        SnackBar(
           content: Text(
             error.toString(),
           ),
@@ -465,7 +465,7 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
                         ),
                         child: const Text(
                           'Delete',
-                          style: const TextStyle(fontSize: 20),
+                          style: TextStyle(fontSize: 20),
                         ),
                       ),
                     )
@@ -505,7 +505,7 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
 class _enrolledCourses extends StatefulWidget {
   final String studentId;
   final Stream<List<Enrollment>> enrollments;
-  const _enrolledCourses({super.key, required this.studentId, required this.enrollments});
+  const _enrolledCourses({required this.studentId, required this.enrollments});
 
   @override
   State<_enrolledCourses> createState() => _enrolledCoursesState();
@@ -541,10 +541,10 @@ class _enrolledCoursesState extends State<_enrolledCourses> {
                     2: FlexColumnWidth(1),
                     3: FlexColumnWidth(2),
                   },
-                  children: [
+                  children: const [
                     TableRow(
-                      decoration: const BoxDecoration(color: Colors.grey),
-                      children: const [
+                      decoration: BoxDecoration(color: Colors.grey),
+                      children: [
                         Padding(
                           padding: EdgeInsets.all(8.0),
                           child: Text(
@@ -620,7 +620,7 @@ class _enrolledCoursesState extends State<_enrolledCourses> {
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Text(
-                                    '${discountedCost.toStringAsFixed(0)}',
+                                    discountedCost.toStringAsFixed(0),
                                     style: const TextStyle(fontSize: 14),
                                   ),
                                 ),

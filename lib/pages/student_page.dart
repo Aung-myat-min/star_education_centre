@@ -85,7 +85,7 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
   final TextEditingController _addressCon = TextEditingController();
   String? _sectionValue;
   List<Course> _courseList = []; // List to hold courses
-  List<String> _selectedCourses = []; // List to hold selected course IDs
+  final List<String> _selectedCourses = []; // List to hold selected course IDs
   double _totalCourseFees = 0;
 
   final _formKey = GlobalKey<FormState>(); // Key for form validation

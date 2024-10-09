@@ -292,7 +292,7 @@ class _CourseListState extends State<_CourseList> {
 class _CourseHoverableContainer extends StatelessWidget {
   final Course course;
 
-  const _CourseHoverableContainer({super.key, required this.course});
+  const _CourseHoverableContainer({required this.course});
 
   @override
   Widget build(BuildContext context) {
