@@ -121,7 +121,6 @@ class Student {
 
 // Subclasses for Registered, Old, and Royal Students remain unchanged.
 class RegisteredStudent extends Student {
-  @override
   static int getDiscount() => 5;
 
   RegisteredStudent(super.sId, super.firstName, super.lastName, super.email,
@@ -129,7 +128,6 @@ class RegisteredStudent extends Student {
 }
 
 class OldStudent extends Student {
-  @override
   static int getDiscount() => 10;
 
   OldStudent(super.sId, super.firstName, super.lastName, super.email,
@@ -137,7 +135,6 @@ class OldStudent extends Student {
 }
 
 class RoyalStudent extends Student {
-  @override
   static int getDiscount() => 20;
 
   RoyalStudent(super.sId, super.firstName, super.lastName, super.email,

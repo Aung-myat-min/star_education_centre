@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:star_education_centre/pages/attendance_page.dart';
 import 'package:star_education_centre/pages/courses_page.dart';
 import 'package:star_education_centre/pages/home_page.dart';
 import 'package:star_education_centre/pages/student_page.dart';
@@ -15,10 +14,9 @@ class _MainPageState extends State<MainPage> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    HomePage(),
-    AttendancePage(),
-    StudentPage(),
-    CoursesPage(),
+    const HomePage(),
+    const StudentPage(),
+    const CoursesPage(),
   ];
 
   void onTabTapped(int index) {
@@ -42,10 +40,6 @@ class _MainPageState extends State<MainPage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.assignment),
-            label: 'Attendance',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.people),

@@ -229,10 +229,8 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
             (course) => course.courseId == courseId,
       );
 
-      if (selectedCourse != null) {
-        selectedCoursesMap[courseId] = selectedCourse.fees;
-      }
-    }
+      selectedCoursesMap[courseId] = selectedCourse.fees;
+        }
 
     // Proceed only if there are selected courses
     if (selectedCoursesMap.isNotEmpty) {

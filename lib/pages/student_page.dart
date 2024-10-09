@@ -411,7 +411,7 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
                   Text(
                     'Total: ${_totalCourseFees.toStringAsFixed(2)} MMK', // Display the total fee
                     style: const TextStyle(
-                      fontSize: 13,
+                      fontSize: 11,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

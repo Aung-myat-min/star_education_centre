@@ -2,11 +2,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:star_education_centre/main_page.dart';
-import 'package:star_education_centre/pages/attendance_page.dart';
 import 'package:star_education_centre/pages/auth/login_page.dart';
-import 'package:star_education_centre/pages/courses_page.dart';
-import 'package:star_education_centre/pages/home_page.dart';
-import 'package:star_education_centre/pages/student_page.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +27,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Map<String, WidgetBuilder> routes = {
-      '/login': (context) => LoginPage(),
+      '/login': (context) => const LoginPage(),
     };
 
     return MaterialApp(

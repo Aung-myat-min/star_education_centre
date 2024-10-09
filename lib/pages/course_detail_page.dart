@@ -66,35 +66,26 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     if (_formKey.currentState!.validate()) {
       try {
         // Ensure that all fields are properly filled and valid
-        if (currentCourse != null) {
-          Course c1 = Course(
-            widget.cId,
-            _courseName.text,
-            double.parse(_fees.text),
-            _aboutCourse.text,
-          );
+        Course c1 = Course(
+          widget.cId,
+          _courseName.text,
+          double.parse(_fees.text),
+          _aboutCourse.text,
+        );
 
-          bool status = await c1.updateCourse();
-          SnackBar snackBar;
-          if (status) {
-            snackBar = const SnackBar(
-              content: Text("Updated the course!"),
-            );
-          } else {
-            snackBar = const SnackBar(
-              content: Text("Failed to update the course."),
-            );
-          }
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        bool status = await c1.updateCourse();
+        SnackBar snackBar;
+        if (status) {
+          snackBar = const SnackBar(
+            content: Text("Updated the course!"),
+          );
         } else {
-          print('Course is null');
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Cannot update the course. Course not loaded.'),
-            ),
+          snackBar = const SnackBar(
+            content: Text("Failed to update the course."),
           );
         }
-      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            } catch (e) {
         print('Error updating course: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -187,19 +178,41 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                       ),
                     ),
                     const SizedBox(height: 30),
-                    SizedBox(
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: buutonClick,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.tealAccent,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: 50,
+                            child: ElevatedButton(
+                              onPressed: buutonClick,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.tealAccent,
+                              ),
+                              child: Text(
+                                readonly ? 'Edit' : 'Update Course',
+                                style: const TextStyle(fontSize: 20),
+                              ),
+                            ),
+                          ),
                         ),
-                        child: Text(
-                          readonly ? 'Edit' : 'Update Course',
-                          style: TextStyle(fontSize: 20),
+                        const SizedBox(width: 10,),
+                        Expanded(
+                          child: SizedBox(
+                            height: 50,
+                            child: ElevatedButton(
+                              onPressed: buutonClick,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.redAccent,
+                              ),
+                              child: const Text(
+                                'Delete',
+                                style: TextStyle(fontSize: 20),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
+                      ],
+                    )
                   ],
                 ),
               ),

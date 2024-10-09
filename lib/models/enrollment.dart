@@ -46,6 +46,25 @@ class Enrollment {
     );
   }
 
+  static Stream<List<Enrollment>> getEnrollmentByCourseAndDate(
+      String courseId, DateTime date) {
+    // Create timestamps for the start and end of the day
+    Timestamp startDate = Timestamp.fromDate(DateTime(date.year, date.month, date.day, 0, 0, 0)); // Start of the day
+    Timestamp endDate = Timestamp.fromDate(DateTime(date.year, date.month, date.day, 23, 59, 59)); // End of the day
+
+    print('Course ID: $courseId, Date: $date');
+    return _enrollmentFireStore
+        .where('courseId', isEqualTo: courseId)
+        .where('enrolledT', isGreaterThanOrEqualTo: startDate)
+        .where('enrolledT', isLessThanOrEqualTo: endDate)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        return Enrollment.fromDocument(doc);
+      }).toList();
+    });
+  }
+
   // Create (Register) an enrollment in Firestore
   Future<bool> enrollStudent() async {
     bool status = false;
@@ -80,7 +99,7 @@ class Enrollment {
   }
 
   // Read enrollment by Id
-  static Future<Enrollment?> readEnrollementById(String enId) async {
+  static Future<Enrollment?> readEnrollmentById(String enId) async {
     try {
       QuerySnapshot snapshot =
           await _enrollmentFireStore.where('enId', isEqualTo: enId).get();
@@ -106,7 +125,6 @@ class Enrollment {
       }).toList();
     });
   }
-
 
   // Update a enrollment in Firestore
   Future<bool> updateEnrollment() async {
