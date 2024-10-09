@@ -27,8 +27,9 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
   String? _sectionValue;
   bool readOnly = true;
   List<Course> _courseList = [];
-  List<String> _selectedCourses = []; // List to hold selected course IDs
+  final List<String> _selectedCourses = []; // List to hold selected course IDs
   Stream<List<Enrollment>>? _enrollments;
+  int discount = 0;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -37,7 +38,7 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
     super.initState();
     _fetchStudentInfo(); // Fetch student info on page load
     _getCourses();
-    _enrollments = Enrollment.getEnrollmentByStudent(widget.sId);
+    _fetchEnrollments();
   }
 
   Future<void> _updateStudentInfo() async {
@@ -191,7 +192,7 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
                       height: 30,
                     ),
                     Text(
-                      "Total Fees: $totalCourseFees MMK",
+                      "Total Fees: ${totalCourseFees - (totalCourseFees * (discount / 100))} MMK ($discount%)",
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ],
@@ -218,7 +219,6 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
       },
     );
   }
-
 
   Future<void> _enrollCourse() async {
     Map<String, double> selectedCoursesMap = {};
@@ -252,6 +252,25 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
     }
   }
 
+  Future<void> _fetchEnrollments() async {
+    _enrollments = Enrollment.getEnrollmentByStudent(widget.sId);
+
+    // Listen to the stream to fetch the number of courses
+    _enrollments?.listen((enrollmentList) {
+      final int numberOfCourses = enrollmentList.length;
+
+      if (numberOfCourses >= 3) {
+        discount = RoyalStudent.getDiscount();
+      } else if (numberOfCourses == 1) {
+        discount = RegisteredStudent.getDiscount();
+      } else if (numberOfCourses == 2) {
+        discount = OldStudent.getDiscount();
+      } else {
+        discount = Student.getDiscount();
+      }
+
+    });
+  }
 
   @override
   void dispose() {
@@ -489,7 +508,6 @@ class _enrolledCoursesState extends State<_enrolledCourses> {
   Widget build(BuildContext context) {
     return StreamBuilder<List<Enrollment>>(
       stream: widget.enrollments,
-      // Get enrollments by student ID
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -501,48 +519,135 @@ class _enrolledCoursesState extends State<_enrolledCourses> {
 
         final enrollments = snapshot.data!;
 
-        return ListView.builder(
-          shrinkWrap: true,
-          itemCount: enrollments.length,
-          itemBuilder: (context, index) {
-            final enrollment = enrollments[index];
+        return SingleChildScrollView(
+          child: SizedBox(
+            width: double.infinity,
+            child: Column(
+              children: [
+                // Table Header
+                Table(
+                  border: TableBorder.all(color: Colors.black, width: 1),
+                  columnWidths: const {
+                    0: FlexColumnWidth(2),
+                    1: FlexColumnWidth(1),
+                    2: FlexColumnWidth(1),
+                    3: FlexColumnWidth(2),
+                  },
+                  children: [
+                    TableRow(
+                      decoration: const BoxDecoration(color: Colors.grey),
+                      children: const [
+                        Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text(
+                            'Course Name',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text(
+                            'Cost',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text(
+                            'Discount',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text(
+                            'Enrolled Date',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                // Table Rows for enrollments
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: enrollments.length,
+                  itemBuilder: (context, index) {
+                    final enrollment = enrollments[index];
 
-            return FutureBuilder<Course?>(
-              future: Course.readCourseById(enrollment.courseId),
-              builder: (context, courseSnapshot) {
-                if (courseSnapshot.connectionState == ConnectionState.waiting) {
-                  return const ListTile(
-                    title: Text('Loading course...'),
-                  );
-                } else if (courseSnapshot.hasError) {
-                  return ListTile(
-                    title: Text('Error: ${courseSnapshot.error}'),
-                  );
-                }
+                    return FutureBuilder<Course?>(
+                      future: Course.readCourseById(enrollment.courseId),
+                      builder: (context, courseSnapshot) {
+                        if (courseSnapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Text("Loading..."); // Custom widget to show loading row
+                        } else if (courseSnapshot.hasError) {
+                          return const Text("Error Loading", style: TextStyle(color: Colors.red),); // Custom widget to show error row
+                        }
 
-                final course = courseSnapshot.data;
+                        final course = courseSnapshot.data;
+                        if (course == null) {
+                          return const Text("Error Loading", style: TextStyle(color: Colors.red),); // Custom widget for unknown course
+                        }
 
-                return ListTile(
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  title: Text(
-                    course?.courseName ?? 'Unknown Course',
-                    style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Text(
-                    'Enrolled on: ${DateFormat.yMMMMd().add_jm().format(enrollment.enrolledT)}', // Formatting enrolled time
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                  trailing: Text(
-                    '\$${enrollment.totalFee.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                );
-              },
-            );
-          },
+                        // Calculate total cost after discount
+                        num discount = enrollment.discount ?? 0.0;
+                        double discountedCost = enrollment.totalFee - discount;
+
+                        return Table(
+                          border: TableBorder.all(color: Colors.black, width: 1),
+                          columnWidths: const {
+                            0: FlexColumnWidth(2),
+                            1: FlexColumnWidth(1),
+                            2: FlexColumnWidth(1),
+                            3: FlexColumnWidth(2),
+                          },
+                          children: [
+                            TableRow(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(course.courseName,
+                                      style: const TextStyle(fontSize: 14)),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    '${discountedCost.toStringAsFixed(0)}',
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    '${enrollment.discount}%',
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    '${enrollment.enrolledT.day}/${enrollment.enrolledT.month}/${enrollment.enrolledT.year}',
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
         );
       },
     );

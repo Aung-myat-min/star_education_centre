@@ -246,42 +246,42 @@ class _CourseListState extends State<_CourseList> {
               ],
             ),
           ),
-          SizedBox(
-            height: 300,
-            child: StreamBuilder<List<Course>>(
-              stream: Course.getCourses(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(
-                    child: Text('No courses found.'),
-                  );
-                }
+          StreamBuilder<List<Course>>(
+            stream: Course.getCourses(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return const Center(
+                  child: Text('No courses found.'),
+                );
+              }
 
-                final courses = snapshot.data!.where((course) {
-                  final matchesSearch = '${course.courseName}'
-                      .toLowerCase()
-                      .contains(_searchQuery.toLowerCase());
-                  return matchesSearch;
-                }).toList();
+              final courses = snapshot.data!.where((course) {
+                final matchesSearch = course.courseName
+                    .toLowerCase()
+                    .contains(_searchQuery.toLowerCase());
+                return matchesSearch;
+              }).toList();
 
-                if (courses.isEmpty) {
-                  return const Center(
-                      child: Text('No courses match your criteria.'));
-                }
+              if (courses.isEmpty) {
+                return const Center(
+                    child: Text('No courses match your search.'));
+              }
 
-                return ListView.builder(
+              return SizedBox(
+                height: courses.length * 90,
+                child: ListView.builder(
                   itemCount: courses.length,
                   itemBuilder: (BuildContext context, int index) {
                     final course = courses[index];
                     return _CourseHoverableContainer(course: course);
                   },
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
         ],
       ),
