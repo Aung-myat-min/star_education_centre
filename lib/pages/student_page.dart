@@ -98,7 +98,7 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
 
   Future<void> _getCourses() async {
     try {
-      Course.getCourses().listen((courses) {
+      courseRepository.getCourses().listen((courses) {
         setState(() {
           _courseList = courses;
         });
@@ -181,7 +181,7 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
           Timestamp.fromDate(startDate));
 
       // Register the student
-      Return response = await s1.registerStudent();
+      Return response = await studentRepository.registerStudent(s1);
       SnackBar snackBar;
 
       if (response.status) {
@@ -510,7 +510,7 @@ class _StudentListState extends State<_StudentList> {
           SizedBox(
             height: 300,
             child: StreamBuilder<List<Student>>(
-              stream: Student.readStudents(), // Your stream of students
+              stream: studentRepository.readStudents(), // Your stream of students
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(

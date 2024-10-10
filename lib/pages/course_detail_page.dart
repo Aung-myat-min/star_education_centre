@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:star_education_centre/constants.dart';
 import 'package:star_education_centre/models/course.dart';
 import 'package:star_education_centre/utils/custom_text_field.dart';
 
@@ -34,7 +35,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
 
   Future<void> _loadCourse() async {
     try {
-      Course? course = await Course.readCourseById(widget.cId);
+      Course? course = await courseRepository.readCourseById(widget.cId);
 
       // Check if course exists
       if (course != null) {
@@ -73,7 +74,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
           _aboutCourse.text,
         );
 
-        bool status = await c1.updateCourse();
+        bool status = await courseRepository.updateCourse(c1);
         SnackBar snackBar;
         if (status) {
           snackBar = const SnackBar(

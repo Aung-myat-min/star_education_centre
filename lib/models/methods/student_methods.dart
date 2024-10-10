@@ -48,7 +48,7 @@ Future<Return> enrollCourses(
       );
 
       // Attempt to enroll the student in the course
-      bool status = await newEnrollment.enrollStudent();
+      bool status = await enrollRepository.enrollStudent(newEnrollment);
       if (!status) {
         allEnrollmentsSuccessful = false;
       }

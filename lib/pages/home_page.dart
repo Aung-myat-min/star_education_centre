@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:star_education_centre/constants.dart';
 import 'package:star_education_centre/models/course.dart';
 import 'package:star_education_centre/models/enrollment.dart';
 import 'package:star_education_centre/models/return.dart';
@@ -34,11 +35,11 @@ class _HomePageState extends State<HomePage> {
       });
 
       // Fetch all required data
-      Return studentInfo = await Student.getTotalStudentNumber();
-      Return courseInfo = await Course.getTotalCourseNumber();
-      Return enrollmentInfo = await Enrollment.getTotalEnrollmentsNumber();
+      Return studentInfo = await studentRepository.getTotalStudentNumber();
+      Return courseInfo = await courseRepository.getTotalCourseNumber();
+      Return enrollmentInfo = await enrollRepository.getTotalEnrollmentsNumber();
       List<Map<String, dynamic>> courseList =
-          await Enrollment.getMostPopularCourses();
+          await enrollRepository.getMostPopularCourses();
 
       // Check for errors in the data fetching
       if (studentInfo.error || studentInfo.status == false) {

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:star_education_centre/constants.dart';
 import 'package:star_education_centre/models/course.dart';
 import 'package:star_education_centre/models/enrollment.dart';
 import 'package:star_education_centre/models/return.dart';
@@ -57,7 +58,7 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
         _startDate!
 
       );
-      bool status = await s1.updateStudent();
+      bool status = await studentRepository.updateStudent(s1);
 
       SnackBar snackBar;
       if (status) {
@@ -84,7 +85,7 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
   Future<void> _fetchStudentInfo() async {
     try {
       // Assuming you have a Student model or service
-      Student? student = await Student.readStudentById(widget.sId);
+      Student? student = await studentRepository.readStudentById(widget.sId);
 
       // Populate the fields with student data
       if (student != null) {
@@ -106,7 +107,7 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
   }
 
   Future<void> _deleteStudent() async {
-    bool status = await currentStudent.deleteStudent();
+    bool status = await studentRepository.deleteStudent(currentStudent.studentId);
 
     if (status) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -132,7 +133,7 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
 
   Future<void> _getCourses() async {
     try {
-      Course.getCourses().listen((courses) {
+      courseRepository.getCourses().listen((courses) {
         setState(() {
           _courseList = courses;
         });
@@ -149,7 +150,7 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
 
   Future<void> _enrollCourseDialog() async {
     // Fetch the student's current enrollments
-    final List<Enrollment> enrollments = await Enrollment.getEnrollmentByStudent(widget.sId).first;
+    final List<Enrollment> enrollments = await enrollRepository.getEnrollmentByStudent(widget.sId).first;
 
     // Extract the course IDs of already enrolled courses
     List<String> enrolledCourseIds = enrollments.map((enrollment) => enrollment.courseId).toList();
@@ -261,7 +262,7 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
   }
 
   Future<void> _fetchEnrollments() async {
-    _enrollments = Enrollment.getEnrollmentByStudent(widget.sId);
+    _enrollments = enrollRepository.getEnrollmentByStudent(widget.sId);
 
     // Listen to the stream to fetch the number of courses
     _enrollments?.listen((enrollmentList) {
@@ -587,7 +588,7 @@ class _enrolledCoursesState extends State<_enrolledCourses> {
                 Column(
                   children: enrollments.map((enrollment) {
                     return FutureBuilder<Course?>(
-                      future: Course.readCourseById(enrollment.courseId),
+                      future: courseRepository.readCourseById(enrollment.courseId),
                       builder: (context, courseSnapshot) {
                         if (courseSnapshot.connectionState == ConnectionState.waiting) {
                           return const Text("Loading..."); // Custom widget to show loading row

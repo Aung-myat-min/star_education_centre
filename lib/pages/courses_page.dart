@@ -83,10 +83,10 @@ class _CourseRegisterFormState extends State<_CourseRegisterForm> {
   Future<void> createCourse() async {
     if (_formKey.currentState!.validate()) {
       var uniqueId = uuid.v1();
-      Course s1 = Course(uniqueId, _courseName.text, double.parse(_fees.text),
+      Course c1 = Course(uniqueId, _courseName.text, double.parse(_fees.text),
           _aboutCourse.text);
 
-      bool status = await s1.createCourse();
+      bool status = await courseRepository.createCourse(c1);
       SnackBar snackBar;
       if (status) {
         snackBar = const SnackBar(
@@ -247,7 +247,7 @@ class _CourseListState extends State<_CourseList> {
             ),
           ),
           StreamBuilder<List<Course>>(
-            stream: Course.getCourses(),
+            stream: courseRepository.getCourses(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
