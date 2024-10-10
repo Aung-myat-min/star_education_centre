@@ -82,10 +82,11 @@ class _HomePageState extends State<HomePage> {
           "⭐ Star Education Centre ⭐",
           style: TextStyle(
             fontWeight: FontWeight.bold,
+            color: Colors.white
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.blue.shade200,
+        backgroundColor: Colors.black87,
       ),
       body: _isLoading
           ? const Center(
@@ -140,7 +141,7 @@ class _HomePageState extends State<HomePage> {
                         "Explore courses, manage students, and stay on top of enrollments!",
                         style: TextStyle(
                           fontSize: 16,
-                          color: Colors.blueGrey,
+                          color: Colors.grey,
                           fontWeight: FontWeight.bold,
                         ),
                         textAlign: TextAlign.center,
@@ -270,7 +271,7 @@ class _HomePageState extends State<HomePage> {
           children: [
             // Table header
             const TableRow(
-              decoration: BoxDecoration(color: Colors.blueGrey),
+              decoration: BoxDecoration(color: Colors.black87),
               children: [
                 Padding(
                   padding: EdgeInsets.all(8.0),

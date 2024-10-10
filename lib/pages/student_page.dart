@@ -25,7 +25,7 @@ class _StudentPageState extends State<StudentPage> {
           icon: const Icon(Icons.menu_rounded),
         ),
         centerTitle: true,
-        title: const Text("Manage Students"),
+        title: const Text("Manage Students", style: TextStyle(color: Colors.white),),
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -51,7 +51,7 @@ class _StudentPageState extends State<StudentPage> {
             ),
           ),
         ],
-        backgroundColor: Colors.tealAccent,
+        backgroundColor: Colors.black87,
       ),
       body: const SafeArea(
         child: SingleChildScrollView(
@@ -388,11 +388,11 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
                       child: ElevatedButton(
                         onPressed: registerStudent,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.tealAccent,
+                          backgroundColor: Colors.lightGreen,
                         ),
                         child: const Text(
                           'Save',
-                          style: TextStyle(fontSize: 20),
+                          style: TextStyle(fontSize: 20, color: Colors.white),
                         ),
                       ),
                     ),
@@ -411,14 +411,14 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
                     height: 50,
                     child: ElevatedButton(
                       onPressed: _showCourseSelectionDialog,
-                      child: const Text('Select Courses'),
+                      child: const Text('Select Courses', style: TextStyle(color: Colors.black),),
                     ),
                   ),
                   Text(
-                    'Total: ${_totalCourseFees.toStringAsFixed(2)} MMK',
+                    'Total: ${_totalCourseFees.toStringAsFixed(0)} MMK',
                     // Display the total fee
                     style: const TextStyle(
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -463,94 +463,98 @@ class _StudentListState extends State<_StudentList> {
 
   @override
   Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(
-        minHeight: 200,
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                // Name or ID Search Field
-                Expanded(
-                  child: TextField(
-                    decoration: const InputDecoration(
-                      labelText: 'Search by Name or ID',
-                      border: OutlineInputBorder(),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: 200,
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  // Name or ID Search Field
+                  Expanded(
+                    child: TextField(
+                      decoration: const InputDecoration(
+                        labelText: 'Search by Name or ID',
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          _searchQuery = value;
+                        });
+                      },
                     ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Section Filter Dropdown
+                  DropdownButton<String>(
+                    value: _selectedSection,
+                    hint: const Text('Select Section'),
+                    items: _sections.map((section) {
+                      return DropdownMenuItem<String>(
+                        value: section,
+                        child: Text(section),
+                      );
+                    }).toList(),
                     onChanged: (value) {
                       setState(() {
-                        _searchQuery = value;
+                        _selectedSection = value;
                       });
                     },
                   ),
-                ),
-                const SizedBox(width: 8),
-                // Section Filter Dropdown
-                DropdownButton<String>(
-                  value: _selectedSection,
-                  hint: const Text('Select Section'),
-                  items: _sections.map((section) {
-                    return DropdownMenuItem<String>(
-                      value: section,
-                      child: Text(section),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedSection = value;
-                    });
-                  },
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          SizedBox(
-            height: 300,
-            child: StreamBuilder<List<Student>>(
-              stream: studentRepository.readStudents(), // Your stream of students
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(
-                    child: Text('No students found.'),
-                  );
-                }
-
-                // Filter students based on search query and selected section
-                final filteredStudents = _filterStudents(snapshot.data!);
-
-                if (filteredStudents.isEmpty) {
-                  return const Center(
-                    child: Text('No students match the search criteria.'),
-                  );
-                }
-
-                // Display filtered students
-                return GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 8,
-                    mainAxisSpacing: 8,
-                    childAspectRatio: 1,
-                  ),
-                  itemCount: filteredStudents.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    final student = filteredStudents[index];
-                    return SelectionArea(
-                      child: HoverableContainer(student: student),
+            SizedBox(
+              height: 300,
+              child: StreamBuilder<List<Student>>(
+                stream: studentRepository.readStudents(),
+                // Your stream of students
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
                     );
-                  },
-                );
-              },
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(
+                      child: Text('No students found.'),
+                    );
+                  }
+
+                  // Filter students based on search query and selected section
+                  final filteredStudents = _filterStudents(snapshot.data!);
+
+                  if (filteredStudents.isEmpty) {
+                    return const Center(
+                      child: Text('No students match the search criteria.'),
+                    );
+                  }
+
+                  // Display filtered students
+                  return GridView.builder(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                      childAspectRatio: 1,
+                    ),
+                    itemCount: filteredStudents.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final student = filteredStudents[index];
+                      return SelectionArea(
+                        child: HoverableContainer(student: student),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

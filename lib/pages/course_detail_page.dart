@@ -108,19 +108,29 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          icon: const Icon(
+            Icons.arrow_back_ios_rounded,
+            color: Colors.white,
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(15.0),
             child: SizedBox(
               width: double.infinity,
-              child: Form( // <-- Wrap with Form
-                key: _formKey, // <-- Assign form key
+              child: Form(
+                key: _formKey,
                 child: Column(
                   children: [
                     const Text(
-                      "Edit Course Info!",
+                      "Edit Course Info",
                       style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 30),
@@ -187,11 +197,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                             child: ElevatedButton(
                               onPressed: buutonClick,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.tealAccent,
+                                backgroundColor: Colors.lightGreen,
                               ),
                               child: Text(
                                 readonly ? 'Edit' : 'Update Course',
-                                style: const TextStyle(fontSize: 20),
+                                style: const TextStyle(fontSize: 20, color: Colors.white),
                               ),
                             ),
                           ),
@@ -203,11 +213,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                             child: ElevatedButton(
                               onPressed: buutonClick,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.redAccent,
+                                backgroundColor: Colors.red.shade300,
                               ),
                               child: const Text(
                                 'Delete',
-                                style: TextStyle(fontSize: 20),
+                                style: TextStyle(fontSize: 20, color: Colors.white),
                               ),
                             ),
                           ),

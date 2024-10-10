@@ -35,8 +35,9 @@ class _HoverableContainerState extends State<HoverableContainer> {
           minWidth: MediaQuery.of(context).size.width * 0.4, // Responsive width
         ),
         decoration: BoxDecoration(
-          color: _isHovered ? Colors.teal.shade300 : Colors.teal.shade400,
+          color: _isHovered ? Colors.white38 : Colors.white60,
           borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white, width: 2),
           boxShadow: _isHovered
               ? [
                   BoxShadow(
@@ -62,9 +63,9 @@ class _HoverableContainerState extends State<HoverableContainer> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const CircleAvatar(
-                backgroundColor: Colors.white,
+                backgroundColor: Colors.black54,
                 radius: 20,
-                child: Icon(Icons.person, size: 30, color: Colors.teal),
+                child: Icon(Icons.person, size: 30, color: Colors.white),
               ),
               const SizedBox(height: 10),
               FittedBox(
@@ -73,7 +74,7 @@ class _HoverableContainerState extends State<HoverableContainer> {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Colors.black,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -83,7 +84,7 @@ class _HoverableContainerState extends State<HoverableContainer> {
                 widget.student.phone,
                 style: const TextStyle(
                   fontSize: 14,
-                  color: Colors.white70,
+                  color: Colors.black,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -93,7 +94,7 @@ class _HoverableContainerState extends State<HoverableContainer> {
                     ? const Text(
                         "Tap to view details",
                         style: TextStyle(
-                          color: Colors.white70,
+                          color: Colors.black87,
                           fontSize: 12,
                         ),
                       )

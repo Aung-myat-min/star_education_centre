@@ -3,10 +3,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:star_education_centre/main_page.dart';
 import 'package:star_education_centre/pages/auth/login_page.dart';
-
+import 'package:star_education_centre/utils/local_storage_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   if (kIsWeb) {
     await Firebase.initializeApp(
       options: const FirebaseOptions(
@@ -18,41 +19,40 @@ void main() async {
   } else {
     await Firebase.initializeApp();
   }
-  runApp(const MyApp());
+
+  // Check login status before running the app
+  LocalStorageService service = LocalStorageService();
+  bool isLoggedIn = await service.isLoggedIn();
+
+  runApp(MyApp(isLoggedIn: isLoggedIn));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isLoggedIn;
+
+  const MyApp({Key? key, required this.isLoggedIn}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final Map<String, WidgetBuilder> routes = {
       '/login': (context) => const LoginPage(),
+      '/home': (context) => const MainPage(),
     };
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Star Education Centre',
       theme: ThemeData(
-        scaffoldBackgroundColor: Colors.blue.shade50,
-        fontFamily: 'BarlowBlack',
-        colorScheme: ColorScheme(
-          primary: Colors.blue.shade800,
-          secondary: Colors.yellow.shade700,
-          surface: Colors.white,
-          error: Colors.red.shade400,
-          onPrimary: Colors.white,
-          onSecondary: Colors.black,
-          onSurface: Colors.black87,
-          onError: Colors.white,
-          brightness: Brightness.light,
-        ),
+        scaffoldBackgroundColor: const Color(0xfff4e7dc),
+        appBarTheme: const AppBarTheme(backgroundColor: Colors.black87),
         useMaterial3: true,
       ),
       routes: routes,
-      initialRoute: '/',
-      home: const MainPage(),
+
+      // Decide the initial route based on login status
+      initialRoute: isLoggedIn
+          ? '/home'
+          : '/login',
     );
   }
 }
-

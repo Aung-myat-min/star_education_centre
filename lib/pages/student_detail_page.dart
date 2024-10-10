@@ -55,9 +55,7 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
           _phoneCon.text,
           _addressCon.text,
           _sectionValue!,
-        _startDate!
-
-      );
+          _startDate!);
       bool status = await studentRepository.updateStudent(s1);
 
       SnackBar snackBar;
@@ -107,7 +105,8 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
   }
 
   Future<void> _deleteStudent() async {
-    bool status = await studentRepository.deleteStudent(currentStudent.studentId);
+    bool status =
+        await studentRepository.deleteStudent(currentStudent.studentId);
 
     if (status) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -150,13 +149,17 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
 
   Future<void> _enrollCourseDialog() async {
     // Fetch the student's current enrollments
-    final List<Enrollment> enrollments = await enrollRepository.getEnrollmentByStudent(widget.sId).first;
+    final List<Enrollment> enrollments =
+        await enrollRepository.getEnrollmentByStudent(widget.sId).first;
 
     // Extract the course IDs of already enrolled courses
-    List<String> enrolledCourseIds = enrollments.map((enrollment) => enrollment.courseId).toList();
+    List<String> enrolledCourseIds =
+        enrollments.map((enrollment) => enrollment.courseId).toList();
 
     // Filter out already enrolled courses from the course list
-    List<Course> availableCourses = _courseList.where((course) => !enrolledCourseIds.contains(course.courseId)).toList();
+    List<Course> availableCourses = _courseList
+        .where((course) => !enrolledCourseIds.contains(course.courseId))
+        .toList();
 
     double totalCourseFees = 0;
     showDialog(
@@ -171,13 +174,13 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
                   children: [
                     ListBody(
                       children: availableCourses.map(
-                            (course) {
+                        (course) {
                           return CheckboxListTile(
                             title: Text(course.courseName),
                             value: _selectedCourses.contains(course.courseId),
                             onChanged: (bool? selected) {
                               setStateDialog(
-                                    () {
+                                () {
                                   if (selected == true) {
                                     _selectedCourses.add(course.courseId);
                                     setState(() {
@@ -234,15 +237,16 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
     // Populate the map with selected courses and their fees
     for (var courseId in _selectedCourses) {
       Course? selectedCourse = _courseList.firstWhere(
-            (course) => course.courseId == courseId,
+        (course) => course.courseId == courseId,
       );
 
       selectedCoursesMap[courseId] = selectedCourse.fees;
-        }
+    }
 
     // Proceed only if there are selected courses
     if (selectedCoursesMap.isNotEmpty) {
-      Return enrollmentResponse = await enrollCourses(widget.sId, selectedCoursesMap);
+      Return enrollmentResponse =
+          await enrollCourses(widget.sId, selectedCoursesMap);
 
       if (enrollmentResponse.status) {
         _selectedCourses = [];
@@ -277,7 +281,6 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
       } else {
         discount = Student.getDiscount();
       }
-
     });
   }
 
@@ -295,7 +298,29 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Student Details'),
+        leading: IconButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          icon: const Icon(
+            Icons.arrow_back_ios_rounded,
+            color: Colors.white,
+          ),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              _deleteStudent();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white70,
+            ),
+            icon: Icon(
+              Icons.delete_forever_rounded,
+              color: Colors.red.shade500,
+            ),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: SizedBox(
@@ -441,11 +466,12 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
                               });
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.tealAccent,
+                              backgroundColor: Colors.lightGreen,
                             ),
                             child: Text(
                               readOnly == true ? 'Edit' : 'Save',
-                              style: const TextStyle(fontSize: 20),
+                              style: const TextStyle(
+                                  fontSize: 20, color: Colors.white),
                             ),
                           ),
                         ),
@@ -454,24 +480,6 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
                   ),
                   const SizedBox(
                     height: 30,
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            _deleteStudent();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.redAccent,
-                          ),
-                          child: const Text(
-                            'Delete',
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        ),
-                      )
-                    ],
                   ),
                   const SizedBox(
                     height: 30,
@@ -483,7 +491,10 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
                   const SizedBox(
                     height: 30,
                   ),
-                  _enrolledCourses(studentId: widget.sId, enrollments: _enrollments!,)
+                  _enrolledCourses(
+                    studentId: widget.sId,
+                    enrollments: _enrollments!,
+                  )
                 ],
               ),
             ),
@@ -492,13 +503,13 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _enrollCourseDialog,
-        backgroundColor: Colors.tealAccent,
+        backgroundColor: Colors.black54,
         // Set the background color to teal accent
         shape: const CircleBorder(),
         // Rounded shape for the icon
         child: const Icon(
           Icons.add,
-          color: Colors.black, // Set the icon color to make it stand out
+          color: Colors.white,
         ),
       ),
     );
@@ -508,6 +519,7 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
 class _enrolledCourses extends StatefulWidget {
   final String studentId;
   final Stream<List<Enrollment>> enrollments;
+
   const _enrolledCourses({required this.studentId, required this.enrollments});
 
   @override
@@ -566,10 +578,12 @@ class _enrolledCoursesState extends State<_enrolledCourses> {
                         ),
                         Padding(
                           padding: EdgeInsets.all(8.0),
-                          child: Text(
-                            'Discount',
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
+                          child: FittedBox(
+                            child: Text(
+                              'Discount',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
                           ),
                         ),
                         Padding(
@@ -588,24 +602,35 @@ class _enrolledCoursesState extends State<_enrolledCourses> {
                 Column(
                   children: enrollments.map((enrollment) {
                     return FutureBuilder<Course?>(
-                      future: courseRepository.readCourseById(enrollment.courseId),
+                      future:
+                          courseRepository.readCourseById(enrollment.courseId),
                       builder: (context, courseSnapshot) {
-                        if (courseSnapshot.connectionState == ConnectionState.waiting) {
-                          return const Text("Loading..."); // Custom widget to show loading row
+                        if (courseSnapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Text(
+                              "Loading..."); // Custom widget to show loading row
                         } else if (courseSnapshot.hasError) {
-                          return const Text("Error Loading", style: TextStyle(color: Colors.red)); // Custom widget to show error row
+                          return const Text("Error Loading",
+                              style: TextStyle(
+                                  color: Colors
+                                      .red)); // Custom widget to show error row
                         }
 
                         final course = courseSnapshot.data;
                         if (course == null) {
-                          return const Text("Error Loading", style: TextStyle(color: Colors.red)); // Custom widget for unknown course
+                          return const Text("Error Loading",
+                              style: TextStyle(
+                                  color: Colors
+                                      .red)); // Custom widget for unknown course
                         }
 
                         // Calculate total cost after discount
-                        double discountedCost = course.fees - (course.fees * (enrollment.discount / 100));
+                        double discountedCost = course.fees -
+                            (course.fees * (enrollment.discount / 100));
 
                         return Table(
-                          border: TableBorder.all(color: Colors.black, width: 1),
+                          border:
+                              TableBorder.all(color: Colors.black, width: 1),
                           columnWidths: const {
                             0: FlexColumnWidth(2),
                             1: FlexColumnWidth(1),

@@ -16,12 +16,8 @@ class _CoursesPageState extends State<CoursesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          onPressed: () => {},
-          icon: const Icon(Icons.menu_rounded),
-        ),
         centerTitle: true,
-        title: const Text("Manage Courses"),
+        title: const Text("Manage Courses", style: TextStyle(color: Colors.white),),
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -47,7 +43,7 @@ class _CoursesPageState extends State<CoursesPage> {
             ),
           ),
         ],
-        backgroundColor: Colors.tealAccent,
+        backgroundColor: Colors.black87,
       ),
       body: const SafeArea(
         child: SingleChildScrollView(
@@ -191,11 +187,11 @@ class _CourseRegisterFormState extends State<_CourseRegisterForm> {
                 child: ElevatedButton(
                   onPressed: createCourse,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.tealAccent,
+                    backgroundColor: Colors.lightGreen,
                   ),
                   child: const Text(
                     'Create Course',
-                    style: TextStyle(fontSize: 20),
+                    style: TextStyle(fontSize: 20, color: Colors.white),
                   ), // Button label
                 ),
               ),
