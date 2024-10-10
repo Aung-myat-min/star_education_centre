@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:star_education_centre/constants.dart';
@@ -19,7 +21,7 @@ class StudentDetailPage extends StatefulWidget {
 }
 
 class _StudentDetailPageState extends State<StudentDetailPage> {
-  late Student currentStudent;
+  Student? currentStudent;
   final TextEditingController _firstNameCon = TextEditingController();
   final TextEditingController _lastNameCon = TextEditingController();
   final TextEditingController _emailCon = TextEditingController();
@@ -36,14 +38,6 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
   int discount = 0;
 
   final _formKey = GlobalKey<FormState>();
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchStudentInfo(); // Fetch student info on page load
-    _getCourses();
-    _fetchEnrollments();
-  }
 
   Future<void> _updateStudentInfo() async {
     try {
@@ -82,31 +76,38 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
 
   Future<void> _fetchStudentInfo() async {
     try {
-      // Assuming you have a Student model or service
       Student? student = await studentRepository.readStudentById(widget.sId);
 
-      // Populate the fields with student data
-      if (student != null) {
-        currentStudent = student;
-        setState(() {
-          _firstNameCon.text = student.firstName;
-          _lastNameCon.text = student.lastName;
-          _emailCon.text = student.email;
-          _phoneCon.text = student.phone;
-          _addressCon.text = student.address;
-          _sectionValue = student.section;
-          _startDate = student.startDate;
-        });
+      if (student == null) {
+        // Handle null student case
+        throw Exception('Student not found');
       }
+
+      discount = await _fetchEnrollments();
+
+      setState(() {
+        currentStudent = student; // Assign the student
+        _firstNameCon.text = student.firstName;
+        _lastNameCon.text = student.lastName;
+        _emailCon.text = student.email;
+        _phoneCon.text = student.phone;
+        _addressCon.text = student.address;
+        _sectionValue = student.section;
+        _startDate = student.startDate;
+      });
     } catch (e) {
-      // Handle error (e.g., show an error message)
-      print('Error fetching student data: $e');
+      // Optionally show a message to the user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to load student data: $e'),
+        ),
+      );
     }
   }
 
   Future<void> _deleteStudent() async {
     bool status =
-        await studentRepository.deleteStudent(currentStudent.studentId);
+        await studentRepository.deleteStudent(currentStudent!.studentId);
 
     if (status) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -143,7 +144,6 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
           content: Text("Error: $error"),
         ),
       );
-      print('Error fetching courses: $error');
     }
   }
 
@@ -246,7 +246,7 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
     // Proceed only if there are selected courses
     if (selectedCoursesMap.isNotEmpty) {
       Return enrollmentResponse =
-          await enrollCourses(widget.sId, selectedCoursesMap);
+          await enrollCourses(currentStudent!, selectedCoursesMap);
 
       if (enrollmentResponse.status) {
         _selectedCourses = [];
@@ -265,23 +265,38 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
     }
   }
 
-  Future<void> _fetchEnrollments() async {
+  Future<int> _fetchEnrollments() async {
+    final Completer<int> completer = Completer<int>();
+
     _enrollments = enrollRepository.getEnrollmentByStudent(widget.sId);
 
     // Listen to the stream to fetch the number of courses
     _enrollments?.listen((enrollmentList) {
-      final int numberOfCourses = enrollmentList.length;
-
-      if (numberOfCourses >= 3) {
-        discount = RoyalStudent.getDiscount();
-      } else if (numberOfCourses == 1) {
-        discount = RegisteredStudent.getDiscount();
-      } else if (numberOfCourses == 2) {
-        discount = OldStudent.getDiscount();
-      } else {
-        discount = Student.getDiscount();
-      }
+      completer.complete(enrollmentList.length);
+    }, onError: (error) {
+      completer.completeError(error); // Handle errors if any
     });
+
+    // Await the completer future to get the result
+    final numberOfEnrollments = await completer.future;
+
+
+    if (numberOfEnrollments >= 3) {
+      return 20;
+    }else if(numberOfEnrollments == 2){
+      return 10;
+    }else if(numberOfEnrollments ==1){
+      return 5;
+    }
+    return 0;
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchStudentInfo(); // Fetch student info on page load
+    _getCourses();
   }
 
   @override
@@ -322,185 +337,188 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: SizedBox(
-          width: double.infinity,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  const Text(
-                    'Student Info!',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 25,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: CustomTextField(
-                          readonly: readOnly,
-                          controller: _firstNameCon,
-                          hintText: 'First Name',
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your first name';
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: CustomTextField(
-                          readonly: readOnly,
-                          controller: _lastNameCon,
-                          hintText: 'Last Name',
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your last name';
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 30),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: CustomTextField(
-                          readonly: readOnly,
-                          controller: _emailCon,
-                          hintText: 'Email',
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your email';
-                            } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
-                                .hasMatch(value)) {
-                              return 'Please enter a valid email';
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: CustomTextField(
-                          readonly: readOnly,
-                          controller: _phoneCon,
-                          hintText: 'Phone Number',
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your phone number';
-                            } else if (value.length < 10) {
-                              return 'Phone number must be at least 10 digits';
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 30),
-                  SizedBox(
-                    width: double.infinity,
-                    child: CustomTextField(
-                      readonly: readOnly,
-                      controller: _addressCon,
-                      hintText: 'Address',
-                      minLines: 2,
-                      maxLines: 4,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your address';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
+      body: currentStudent == null
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: SizedBox(
+                width: double.infinity,
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        const Text(
+                          'Student Info!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold,
                           ),
-                          hint: const Text('Select Section'),
-                          value: _sectionValue,
-                          // Preselect value
-                          items: ['A', 'B', 'C', 'D'].map((String section) {
-                            return DropdownMenuItem<String>(
-                              value: section,
-                              child: Text(section),
-                            );
-                          }).toList(),
-                          onChanged: readOnly
-                              ? null // Disable if readonly
-                              : (String? newValue) {
-                                  setState(() {
-                                    _sectionValue = newValue;
-                                  });
+                        ),
+                        const SizedBox(height: 30),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: CustomTextField(
+                                readonly: readOnly,
+                                controller: _firstNameCon,
+                                hintText: 'First Name',
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter your first name';
+                                  }
+                                  return null;
                                 },
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: CustomTextField(
+                                readonly: readOnly,
+                                controller: _lastNameCon,
+                                hintText: 'Last Name',
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter your last name';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: SizedBox(
-                          height: 50,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                readOnly = !readOnly;
-                                if (readOnly) {
-                                  print("object");
-                                  _updateStudentInfo();
-                                }
-                              });
+                        const SizedBox(height: 30),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: CustomTextField(
+                                readonly: readOnly,
+                                controller: _emailCon,
+                                hintText: 'Email',
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter your email';
+                                  } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                                      .hasMatch(value)) {
+                                    return 'Please enter a valid email';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: CustomTextField(
+                                readonly: readOnly,
+                                controller: _phoneCon,
+                                hintText: 'Phone Number',
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter your phone number';
+                                  } else if (value.length < 10) {
+                                    return 'Phone number must be at least 10 digits';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 30),
+                        SizedBox(
+                          width: double.infinity,
+                          child: CustomTextField(
+                            readonly: readOnly,
+                            controller: _addressCon,
+                            hintText: 'Address',
+                            minLines: 2,
+                            maxLines: 4,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your address';
+                              }
+                              return null;
                             },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.lightGreen,
-                            ),
-                            child: Text(
-                              readOnly == true ? 'Edit' : 'Save',
-                              style: const TextStyle(
-                                  fontSize: 20, color: Colors.white),
-                            ),
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 30),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: DropdownButtonFormField<String>(
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                ),
+                                hint: const Text('Select Section'),
+                                value: _sectionValue,
+                                // Preselect value
+                                items:
+                                    ['A', 'B', 'C', 'D'].map((String section) {
+                                  return DropdownMenuItem<String>(
+                                    value: section,
+                                    child: Text(section),
+                                  );
+                                }).toList(),
+                                onChanged: readOnly
+                                    ? null // Disable if readonly
+                                    : (String? newValue) {
+                                        setState(() {
+                                          _sectionValue = newValue;
+                                        });
+                                      },
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: SizedBox(
+                                height: 50,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      readOnly = !readOnly;
+                                      if (readOnly) {
+                                        _updateStudentInfo();
+                                      }
+                                    });
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.lightGreen,
+                                  ),
+                                  child: Text(
+                                    readOnly == true ? 'Edit' : 'Save',
+                                    style: const TextStyle(
+                                        fontSize: 20, color: Colors.white),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 30,
+                        ),
+                        const SizedBox(
+                          height: 30,
+                        ),
+                        const Text(
+                          "Enrolled Courses",
+                          style: TextStyle(fontSize: 30),
+                        ),
+                        const SizedBox(
+                          height: 30,
+                        ),
+                        _EnrolledCourses(
+                          studentId: widget.sId,
+                          enrollments: _enrollments!,
+                        )
+                      ],
+                    ),
                   ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  const Text(
-                    "Enrolled Courses",
-                    style: TextStyle(fontSize: 30),
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  _enrolledCourses(
-                    studentId: widget.sId,
-                    enrollments: _enrollments!,
-                  )
-                ],
+                ),
               ),
             ),
-          ),
-        ),
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _enrollCourseDialog,
         backgroundColor: Colors.black54,
@@ -516,17 +534,17 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
   }
 }
 
-class _enrolledCourses extends StatefulWidget {
+class _EnrolledCourses extends StatefulWidget {
   final String studentId;
   final Stream<List<Enrollment>> enrollments;
 
-  const _enrolledCourses({required this.studentId, required this.enrollments});
+  const _EnrolledCourses({required this.studentId, required this.enrollments});
 
   @override
-  State<_enrolledCourses> createState() => _enrolledCoursesState();
+  State<_EnrolledCourses> createState() => _EnrolledCoursesState();
 }
 
-class _enrolledCoursesState extends State<_enrolledCourses> {
+class _EnrolledCoursesState extends State<_EnrolledCourses> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<Enrollment>>(

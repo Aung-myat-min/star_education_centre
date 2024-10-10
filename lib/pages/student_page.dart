@@ -170,15 +170,15 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
       final DateTime startDate = DateTime.now();
 
       // Create new student object
-      Student s1 = Student(
+      Student s1 = Student.determineStudentClass(
           uniqueId,
           _firstNameCon.text,
           _lastNameCon.text,
           _emailCon.text,
           _phoneCon.text,
           _addressCon.text,
-          _sectionValue!,
-          Timestamp.fromDate(startDate));
+          Timestamp.fromDate(startDate),
+          _sectionValue!, 0);
 
       // Register the student
       Return response = await studentRepository.registerStudent(s1);
@@ -223,7 +223,7 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
         // Enroll the student in the selected courses
         if (selectedCoursesMap.isNotEmpty) {
           Return enrollmentResponse =
-              await enrollCourses(currentStudentId!, selectedCoursesMap);
+              await enrollCourses(s1, selectedCoursesMap );
 
           if (enrollmentResponse.status) {
             ScaffoldMessenger.of(context).showSnackBar(

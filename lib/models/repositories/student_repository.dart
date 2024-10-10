@@ -25,10 +25,15 @@ class StudentRepository {
 
   // Method to read (get) students from Firestore
   Stream<List<Student>> readStudents() {
-    return _studentFireStore.snapshots().map((snapshot) {
-      return snapshot.docs.map((doc) => Student.fromDocument(doc)).toList();
+    return _studentFireStore.snapshots().asyncMap((snapshot) async {
+      List<Future<Student>> futures = snapshot.docs.map((doc) async {
+        return await Student.fromDocument(doc);
+      }).toList();
+
+      return await Future.wait(futures);
     });
   }
+
 
   // Method to read a student by Id
   Future<Student?> readStudentById(String studentId) async {

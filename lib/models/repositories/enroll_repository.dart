@@ -7,7 +7,7 @@ import 'package:star_education_centre/models/return.dart';
 class EnrollRepository{
   final CollectionReference _enrollmentFireStore =
   FirebaseFirestore.instance.collection('enrollments');
-  final CourseRepository _courseRepository = new CourseRepository();
+  final CourseRepository _courseRepository = CourseRepository();
 
   // Method to get the 3 most popular courses
   Future<List<Map<String, dynamic>>> getMostPopularCourses() async {

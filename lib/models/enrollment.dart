@@ -1,6 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:star_education_centre/models/course.dart';
-import 'package:star_education_centre/models/return.dart';
 
 class Enrollment {
   final String _enId;

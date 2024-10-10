@@ -6,26 +6,17 @@ import 'package:star_education_centre/models/student.dart';
 
 //return status only
 Future<Return> enrollCourses(
-    String studentId, Map<String, double> courseFeesMap) async {
+    Student student, Map<String, double> courseFeesMap) async {
   Return response = Return(status: false);
   bool allEnrollmentsSuccessful = true;
 
   try {
     final DateTime enrolledT = DateTime.now();
-    final int numberOfCourses = await getNumbersOfEnrollments(studentId)
+    final int numberOfCourses = await getNumbersOfEnrollments(student.studentId)
         .then((response) => response.data);
 
     // Calculate the discount based on the number of enrollments
-    final int discount;
-    if (numberOfCourses >= 3) {
-      discount = RoyalStudent.getDiscount();
-    } else if (numberOfCourses == 1) {
-      discount = RegisteredStudent.getDiscount();
-    } else if (numberOfCourses == 2) {
-      discount = OldStudent.getDiscount();
-    } else {
-      discount = Student.getDiscount();
-    }
+    final int discount = student.getDiscount();
 
     // Loop through each course and enroll the student
     for (String courseId in courseFeesMap.keys) {
@@ -43,7 +34,7 @@ Future<Return> enrollCourses(
         discount,
         enrolledT,
         totalFee,
-        studentId,
+        student.studentId,
         courseId,
       );
 
