@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:star_education_centre/constants.dart';
+import 'package:star_education_centre/models/enrollment.dart';
 import 'package:star_education_centre/models/student.dart';
 import 'package:star_education_centre/models/return.dart';
 
@@ -99,4 +101,59 @@ class StudentRepository {
 
     return response;
   }
+
+  //return status only
+  Future<Return> enrollCourses(
+      Student student, Map<String, double> courseFeesMap) async {
+    Return response = Return(status: false);
+    bool allEnrollmentsSuccessful = true;
+
+    try {
+      final DateTime enrolledT = DateTime.now();
+      Student determinedStudent = Student.determineStudentClass(student.studentId, student.firstName, student.lastName, student.email, student.phone, student.address, student.startDate, student.section, student.numberOfCourses);
+
+      print(student);
+      // Calculate the discount based on the number of enrollments
+      final int discount = determinedStudent.getDiscount();
+      print('repo $discount');
+      // Loop through each course and enroll the student
+      for (String courseId in courseFeesMap.keys) {
+        double courseFee = courseFeesMap[courseId]!;
+
+        // Calculate the discounted total amount
+        double discountAmount = (courseFee * discount) / 100;
+        double totalFee = courseFee - discountAmount;
+
+        // Generate enrollment ID
+        final String enId = uuid.v1();
+
+        Enrollment newEnrollment = Enrollment(
+          enId,
+          discount,
+          enrolledT,
+          totalFee,
+          student.studentId,
+          courseId,
+        );
+
+        // Attempt to enroll the student in the course
+        bool status = await enrollRepository.enrollStudent(newEnrollment);
+        if (!status) {
+          allEnrollmentsSuccessful = false;
+        }
+      }
+
+      student.numberOfCourses += courseFeesMap.length;
+      updateStudent(student);
+
+      // Set the response based on whether all enrollments were successful
+      response.status = allEnrollmentsSuccessful;
+
+    } catch (error) {
+      print("Error Enrolling Courses: $error");
+      response.status = false;
+    }
+    return response;
+  }
+
 }

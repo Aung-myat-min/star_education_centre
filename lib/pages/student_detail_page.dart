@@ -6,22 +6,20 @@ import 'package:star_education_centre/constants.dart';
 import 'package:star_education_centre/models/course.dart';
 import 'package:star_education_centre/models/enrollment.dart';
 import 'package:star_education_centre/models/return.dart';
-import 'package:star_education_centre/models/student.dart'; // Assuming you have a Student model or service
+import 'package:star_education_centre/models/student.dart';
 import 'package:star_education_centre/utils/custom_text_field.dart';
 
-import '../models/methods/student_methods.dart';
-
 class StudentDetailPage extends StatefulWidget {
-  const StudentDetailPage({super.key, required this.sId});
+  const StudentDetailPage({super.key, required this.student});
 
-  final String sId;
+  final Student student;
 
   @override
   State<StudentDetailPage> createState() => _StudentDetailPageState();
 }
 
 class _StudentDetailPageState extends State<StudentDetailPage> {
-  Student? currentStudent;
+  late Student currentStudent;
   final TextEditingController _firstNameCon = TextEditingController();
   final TextEditingController _lastNameCon = TextEditingController();
   final TextEditingController _emailCon = TextEditingController();
@@ -30,10 +28,10 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
   String? _sectionValue;
   Timestamp? _startDate;
 
-  //page transition associated
+  //page associated
   bool readOnly = true;
   List<Course> _courseList = [];
-  List<String> _selectedCourses = []; // List to hold selected course IDs
+  final List<String> _selectedCourses = []; // List to hold selected course IDs
   Stream<List<Enrollment>>? _enrollments;
   int discount = 0;
 
@@ -42,14 +40,15 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
   Future<void> _updateStudentInfo() async {
     try {
       Student s1 = Student(
-          widget.sId,
+          widget.student.studentId,
           _firstNameCon.text,
           _lastNameCon.text,
           _emailCon.text,
           _phoneCon.text,
           _addressCon.text,
           _sectionValue!,
-          _startDate!);
+          _startDate!,
+          currentStudent.numberOfCourses);
       bool status = await studentRepository.updateStudent(s1);
 
       SnackBar snackBar;
@@ -74,40 +73,9 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
     }
   }
 
-  Future<void> _fetchStudentInfo() async {
-    try {
-      Student? student = await studentRepository.readStudentById(widget.sId);
-
-      if (student == null) {
-        // Handle null student case
-        throw Exception('Student not found');
-      }
-
-      discount = await _fetchEnrollments();
-
-      setState(() {
-        currentStudent = student; // Assign the student
-        _firstNameCon.text = student.firstName;
-        _lastNameCon.text = student.lastName;
-        _emailCon.text = student.email;
-        _phoneCon.text = student.phone;
-        _addressCon.text = student.address;
-        _sectionValue = student.section;
-        _startDate = student.startDate;
-      });
-    } catch (e) {
-      // Optionally show a message to the user
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to load student data: $e'),
-        ),
-      );
-    }
-  }
-
   Future<void> _deleteStudent() async {
     bool status =
-        await studentRepository.deleteStudent(currentStudent!.studentId);
+        await studentRepository.deleteStudent(currentStudent.studentId);
 
     if (status) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -149,8 +117,9 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
 
   Future<void> _enrollCourseDialog() async {
     // Fetch the student's current enrollments
-    final List<Enrollment> enrollments =
-        await enrollRepository.getEnrollmentByStudent(widget.sId).first;
+    final List<Enrollment> enrollments = await enrollRepository
+        .getEnrollmentByStudent(widget.student.studentId)
+        .first;
 
     // Extract the course IDs of already enrolled courses
     List<String> enrolledCourseIds =
@@ -233,69 +202,70 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
 
   Future<void> _enrollCourse() async {
     Map<String, double> selectedCoursesMap = {};
-
     // Populate the map with selected courses and their fees
     for (var courseId in _selectedCourses) {
       Course? selectedCourse = _courseList.firstWhere(
-        (course) => course.courseId == courseId,
+            (course) => course.courseId == courseId,
       );
 
       selectedCoursesMap[courseId] = selectedCourse.fees;
     }
 
-    // Proceed only if there are selected courses
-    if (selectedCoursesMap.isNotEmpty) {
-      Return enrollmentResponse =
-          await enrollCourses(currentStudent!, selectedCoursesMap);
-
-      if (enrollmentResponse.status) {
-        _selectedCourses = [];
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Enrolled in courses successfully!")),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Course enrollment failed!")),
-        );
-      }
-    } else {
+    if (selectedCoursesMap.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("No courses selected!")),
       );
+      return;
     }
+
+    Return enrollmentResponse = await studentRepository.enrollCourses(
+        currentStudent, selectedCoursesMap);
+
+    if (enrollmentResponse.status) {
+      _selectedCourses.clear();  // Clear selected courses
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Enrolled in courses successfully!")),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Course enrollment failed!")),
+      );
+    }
+    determineDiscount();
   }
 
-  Future<int> _fetchEnrollments() async {
-    final Completer<int> completer = Completer<int>();
 
-    _enrollments = enrollRepository.getEnrollmentByStudent(widget.sId);
-
-    // Listen to the stream to fetch the number of courses
-    _enrollments?.listen((enrollmentList) {
-      completer.complete(enrollmentList.length);
-    }, onError: (error) {
-      completer.completeError(error); // Handle errors if any
-    });
-
-    // Await the completer future to get the result
-    final numberOfEnrollments = await completer.future;
-
-
-    if (numberOfEnrollments >= 3) {
-      return 20;
-    }else if(numberOfEnrollments == 2){
-      return 10;
-    }else if(numberOfEnrollments ==1){
-      return 5;
+  void determineDiscount() {
+    if (currentStudent.numberOfCourses >= 3) {
+      discount = 20;
+    } else if (currentStudent.numberOfCourses == 2) {
+      discount = 10;
+    } else if (currentStudent.numberOfCourses == 1) {
+      discount = 5;
+    } else {
+      discount = 0;
     }
-    return 0;
-  }
 
+    print('${currentStudent.numberOfCourses} ${discount}');
+  }
 
   @override
   void initState() {
     super.initState();
-    _fetchStudentInfo(); // Fetch student info on page load
+    currentStudent = widget.student;
+    _firstNameCon.text = currentStudent.firstName;
+    _lastNameCon.text = currentStudent.lastName;
+    _emailCon.text = currentStudent.email;
+    _phoneCon.text = currentStudent.phone;
+    _addressCon.text = currentStudent.address;
+    _sectionValue = currentStudent.section;
+    _startDate = currentStudent.startDate;
+
+    determineDiscount();
+
+    _enrollments =
+        enrollRepository.getEnrollmentByStudent(widget.student.studentId);
     _getCourses();
   }
 
@@ -311,6 +281,7 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    print(currentStudent);
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -337,188 +308,184 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
           ),
         ],
       ),
-      body: currentStudent == null
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: SizedBox(
-                width: double.infinity,
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        const Text(
-                          'Student Info!',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 30),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: CustomTextField(
-                                readonly: readOnly,
-                                controller: _firstNameCon,
-                                hintText: 'First Name',
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your first name';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: CustomTextField(
-                                readonly: readOnly,
-                                controller: _lastNameCon,
-                                hintText: 'Last Name',
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your last name';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 30),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: CustomTextField(
-                                readonly: readOnly,
-                                controller: _emailCon,
-                                hintText: 'Email',
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your email';
-                                  } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
-                                      .hasMatch(value)) {
-                                    return 'Please enter a valid email';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: CustomTextField(
-                                readonly: readOnly,
-                                controller: _phoneCon,
-                                hintText: 'Phone Number',
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your phone number';
-                                  } else if (value.length < 10) {
-                                    return 'Phone number must be at least 10 digits';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 30),
-                        SizedBox(
-                          width: double.infinity,
-                          child: CustomTextField(
-                            readonly: readOnly,
-                            controller: _addressCon,
-                            hintText: 'Address',
-                            minLines: 2,
-                            maxLines: 4,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter your address';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 30),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: DropdownButtonFormField<String>(
-                                decoration: const InputDecoration(
-                                  border: OutlineInputBorder(),
-                                ),
-                                hint: const Text('Select Section'),
-                                value: _sectionValue,
-                                // Preselect value
-                                items:
-                                    ['A', 'B', 'C', 'D'].map((String section) {
-                                  return DropdownMenuItem<String>(
-                                    value: section,
-                                    child: Text(section),
-                                  );
-                                }).toList(),
-                                onChanged: readOnly
-                                    ? null // Disable if readonly
-                                    : (String? newValue) {
-                                        setState(() {
-                                          _sectionValue = newValue;
-                                        });
-                                      },
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: SizedBox(
-                                height: 50,
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      readOnly = !readOnly;
-                                      if (readOnly) {
-                                        _updateStudentInfo();
-                                      }
-                                    });
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.lightGreen,
-                                  ),
-                                  child: Text(
-                                    readOnly == true ? 'Edit' : 'Save',
-                                    style: const TextStyle(
-                                        fontSize: 20, color: Colors.white),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 30,
-                        ),
-                        const SizedBox(
-                          height: 30,
-                        ),
-                        const Text(
-                          "Enrolled Courses",
-                          style: TextStyle(fontSize: 30),
-                        ),
-                        const SizedBox(
-                          height: 30,
-                        ),
-                        _EnrolledCourses(
-                          studentId: widget.sId,
-                          enrollments: _enrollments!,
-                        )
-                      ],
+      body: SingleChildScrollView(
+        child: SizedBox(
+          width: double.infinity,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  const Text(
+                    'Student Info!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
+                  const SizedBox(height: 30),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CustomTextField(
+                          readonly: readOnly,
+                          controller: _firstNameCon,
+                          hintText: 'First Name',
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your first name';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: CustomTextField(
+                          readonly: readOnly,
+                          controller: _lastNameCon,
+                          hintText: 'Last Name',
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your last name';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 30),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CustomTextField(
+                          readonly: readOnly,
+                          controller: _emailCon,
+                          hintText: 'Email',
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your email';
+                            } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                                .hasMatch(value)) {
+                              return 'Please enter a valid email';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: CustomTextField(
+                          readonly: readOnly,
+                          controller: _phoneCon,
+                          hintText: 'Phone Number',
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your phone number';
+                            } else if (value.length < 10) {
+                              return 'Phone number must be at least 10 digits';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 30),
+                  SizedBox(
+                    width: double.infinity,
+                    child: CustomTextField(
+                      readonly: readOnly,
+                      controller: _addressCon,
+                      hintText: 'Address',
+                      minLines: 2,
+                      maxLines: 4,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your address';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                          ),
+                          hint: const Text('Select Section'),
+                          value: _sectionValue,
+                          // Preselect value
+                          items: ['A', 'B', 'C', 'D'].map((String section) {
+                            return DropdownMenuItem<String>(
+                              value: section,
+                              child: Text(section),
+                            );
+                          }).toList(),
+                          onChanged: readOnly
+                              ? null // Disable if readonly
+                              : (String? newValue) {
+                                  setState(() {
+                                    _sectionValue = newValue;
+                                  });
+                                },
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: SizedBox(
+                          height: 50,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                readOnly = !readOnly;
+                                if (readOnly) {
+                                  _updateStudentInfo();
+                                }
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.lightGreen,
+                            ),
+                            child: Text(
+                              readOnly == true ? 'Edit' : 'Save',
+                              style: const TextStyle(
+                                  fontSize: 20, color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  const Text(
+                    "Enrolled Courses",
+                    style: TextStyle(fontSize: 30),
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  _EnrolledCourses(
+                    studentId: widget.student.studentId,
+                    enrollments: _enrollments!,
+                  )
+                ],
               ),
             ),
+          ),
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _enrollCourseDialog,
         backgroundColor: Colors.black54,

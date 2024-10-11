@@ -55,7 +55,7 @@ class _HoverableContainerState extends State<HoverableContainer> {
               context,
               MaterialPageRoute(
                 builder: (context) =>
-                    StudentDetailPage(sId: widget.student.studentId),
+                    StudentDetailPage(student: widget.student),
               ),
             );
           },

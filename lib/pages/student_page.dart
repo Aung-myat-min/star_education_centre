@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:star_education_centre/constants.dart';
 import 'package:star_education_centre/models/course.dart';
-import 'package:star_education_centre/models/methods/student_methods.dart';
 import 'package:star_education_centre/models/return.dart';
 import 'package:star_education_centre/models/student.dart';
 import 'package:star_education_centre/utils/custom_text_field.dart';
@@ -223,7 +222,7 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
         // Enroll the student in the selected courses
         if (selectedCoursesMap.isNotEmpty) {
           Return enrollmentResponse =
-              await enrollCourses(s1, selectedCoursesMap );
+              await studentRepository.enrollCourses(s1, selectedCoursesMap );
 
           if (enrollmentResponse.status) {
             ScaffoldMessenger.of(context).showSnackBar(
