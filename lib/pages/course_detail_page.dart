@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_icon_snackbar/flutter_icon_snackbar.dart';
 import 'package:star_education_centre/constants.dart';
 import 'package:star_education_centre/models/course.dart';
 import 'package:star_education_centre/utils/custom_text_field.dart';
+import 'package:star_education_centre/utils/status_snackbar.dart';
 
 class CourseDetailPage extends StatefulWidget {
   const CourseDetailPage({super.key, required this.cId});
@@ -28,10 +30,9 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
       }
     }
     setState(() {
-      readonly = !readonly;  // Toggle readonly mode
+      readonly = !readonly; // Toggle readonly mode
     });
   }
-
 
   Future<void> _loadCourse() async {
     try {
@@ -40,26 +41,17 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
       // Check if course exists
       if (course != null) {
         setState(() {
-          currentCourse = course;  // Set the current course
+          currentCourse = course; // Set the current course
           _courseName.text = course.courseName;
           _aboutCourse.text = course.aboutCourse;
           _fees.text = course.fees.toString();
         });
       } else {
-        // Handle the case where no course is found
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Course not found!'),
-          ),
-        );
+        statusSnackBar(context, SnackBarType.alert, "Course not found!");
       }
     } catch (e) {
-      print('Error fetching course data: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to load course data.'),
-        ),
-      );
+      statusSnackBar(
+          context, SnackBarType.fail, "Failed to load course data...");
     }
   }
 
@@ -75,29 +67,18 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
         );
 
         bool status = await courseRepository.updateCourse(c1);
-        SnackBar snackBar;
         if (status) {
-          snackBar = const SnackBar(
-            content: Text("Updated the course!"),
-          );
+          statusSnackBar(context, SnackBarType.success, "Updated Course!");
         } else {
-          snackBar = const SnackBar(
-            content: Text("Failed to update the course."),
-          );
+          statusSnackBar(
+              context, SnackBarType.fail, "Failed to update the course.");
         }
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-            } catch (e) {
-        print('Error updating course: $e');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to update course. Invalid input!'),
-          ),
-        );
+      } catch (e) {
+        statusSnackBar(context, SnackBarType.fail,
+            "Failed to update course. Invalid input!");
       }
     }
   }
-
-
 
   @override
   void initState() {
@@ -131,7 +112,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                   children: [
                     const Text(
                       "Edit Course Info",
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 30),
                     Row(
@@ -201,12 +183,15 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                               ),
                               child: Text(
                                 readonly ? 'Edit' : 'Update Course',
-                                style: const TextStyle(fontSize: 20, color: Colors.white),
+                                style: const TextStyle(
+                                    fontSize: 20, color: Colors.white),
                               ),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 10,),
+                        const SizedBox(
+                          width: 10,
+                        ),
                         Expanded(
                           child: SizedBox(
                             height: 50,
@@ -217,7 +202,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                               ),
                               child: const Text(
                                 'Delete',
-                                style: TextStyle(fontSize: 20, color: Colors.white),
+                                style: TextStyle(
+                                    fontSize: 20, color: Colors.white),
                               ),
                             ),
                           ),
@@ -233,5 +219,4 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
       ),
     );
   }
-
 }

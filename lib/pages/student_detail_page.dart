@@ -2,12 +2,15 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_icon_snackbar/flutter_icon_snackbar.dart';
 import 'package:star_education_centre/constants.dart';
 import 'package:star_education_centre/models/course.dart';
 import 'package:star_education_centre/models/enrollment.dart';
 import 'package:star_education_centre/models/return.dart';
 import 'package:star_education_centre/models/student.dart';
+import 'package:star_education_centre/utils/confirmation_box.dart';
 import 'package:star_education_centre/utils/custom_text_field.dart';
+import 'package:star_education_centre/utils/status_snackbar.dart';
 
 class StudentDetailPage extends StatefulWidget {
   const StudentDetailPage({super.key, required this.student});
@@ -51,51 +54,35 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
           currentStudent.numberOfCourses);
       bool status = await studentRepository.updateStudent(s1);
 
-      SnackBar snackBar;
       if (status) {
-        snackBar = const SnackBar(
-          content: Text("Updated Student!"),
-        );
+        statusSnackBar(
+            context, SnackBarType.success, "Successfully Updated Student!");
       } else {
-        snackBar = const SnackBar(
-          content: Text("Update Failed!"),
-        );
+        statusSnackBar(context, SnackBarType.fail, "Failed Updating Student!");
       }
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            error.toString(),
-          ),
-        ),
-      );
+      statusSnackBar(context, SnackBarType.fail, "Error: $error");
     }
   }
 
   Future<void> _deleteStudent() async {
-    bool status =
-        await studentRepository.deleteStudent(currentStudent.studentId);
+    bool confirmation = await showConfirmationDialog(context, "Delete Student?", "Are you sure? This action can't be undone.");
+    if(confirmation){
+      bool status =
+      await studentRepository.deleteStudent(currentStudent.studentId);
 
-    if (status) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Student Deleted!"),
-        ),
-      );
+      if (status) {
+        statusSnackBar(context, SnackBarType.alert, "Student Deleted!");
 
-      await Future.delayed(const Duration(seconds: 2));
+        await Future.delayed(const Duration(seconds: 2));
 
-      // Redirect back to the previous page
-      if (context.mounted) {
-        Navigator.pop(context);
+        // Redirect back to the previous page
+        if (context.mounted) {
+          Navigator.pop(context);
+        }
+      } else {
+        statusSnackBar(context, SnackBarType.fail, "Error Deleting Student!");
       }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Error: Student Deletion!"),
-        ),
-      );
     }
   }
 
@@ -107,11 +94,8 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
         });
       });
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error: $error"),
-        ),
-      );
+      statusSnackBar(
+          context, SnackBarType.fail, "Error getting courses: $error!");
     }
   }
 
@@ -205,16 +189,14 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
     // Populate the map with selected courses and their fees
     for (var courseId in _selectedCourses) {
       Course? selectedCourse = _courseList.firstWhere(
-            (course) => course.courseId == courseId,
+        (course) => course.courseId == courseId,
       );
 
       selectedCoursesMap[courseId] = selectedCourse.fees;
     }
 
     if (selectedCoursesMap.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No courses selected!")),
-      );
+      statusSnackBar(context, SnackBarType.alert, "No Course Selected!");
       return;
     }
 
@@ -222,19 +204,15 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
         currentStudent, selectedCoursesMap);
 
     if (enrollmentResponse.status) {
-      _selectedCourses.clear();  // Clear selected courses
+      _selectedCourses.clear(); // Clear selected courses
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Enrolled in courses successfully!")),
-      );
+      statusSnackBar(
+          context, SnackBarType.success, "Successfully Enrolled Courses!");
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Course enrollment failed!")),
-      );
+      statusSnackBar(context, SnackBarType.fail, "Course Enrollment Failed!");
     }
     determineDiscount();
   }
-
 
   void determineDiscount() {
     if (currentStudent.numberOfCourses >= 3) {
@@ -247,7 +225,7 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
       discount = 0;
     }
 
-    print('${currentStudent.numberOfCourses} ${discount}');
+    print('${currentStudent.numberOfCourses} $discount');
   }
 
   @override

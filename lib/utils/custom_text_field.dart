@@ -27,7 +27,8 @@ class CustomTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      readOnly: readonly, // No need for force unwrapping (!)
+      readOnly: readonly,
+      // No need for force unwrapping (!)
       controller: controller,
       decoration: InputDecoration(
         hintText: hintText,
@@ -40,7 +41,8 @@ class CustomTextField extends StatelessWidget {
             : null,
       ),
       minLines: minLines,
-      maxLines: maxLines ?? 1, // Default to single-line text field
+      maxLines: maxLines ?? 1,
+      // Default to single-line text field
       validator: validator,
       obscureText: obscureText, // No need for force unwrapping (!)
     );

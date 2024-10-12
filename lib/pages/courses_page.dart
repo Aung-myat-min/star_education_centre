@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_icon_snackbar/flutter_icon_snackbar.dart';
 import 'package:star_education_centre/constants.dart';
 import 'package:star_education_centre/models/course.dart';
 import 'package:star_education_centre/pages/course_detail_page.dart';
 import 'package:star_education_centre/utils/custom_text_field.dart';
+import 'package:star_education_centre/utils/logout_button.dart';
+import 'package:star_education_centre/utils/status_snackbar.dart';
 
 class CoursesPage extends StatefulWidget {
   const CoursesPage({super.key});
@@ -17,32 +20,11 @@ class _CoursesPageState extends State<CoursesPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text("Manage Courses", style: TextStyle(color: Colors.white),),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: IconButton(
-              onPressed: () => {},
-              icon: const Icon(Icons.logout_rounded),
-              style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all(
-                  Colors.redAccent.withOpacity(0.2),
-                ),
-                shape: WidgetStateProperty.all(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12), // Rounded border
-                  ),
-                ),
-                side: WidgetStateProperty.all(
-                  const BorderSide(
-                    color: Colors.redAccent, // Border color redAccent
-                    width: 1, // Border width
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
+        title: const Text(
+          "Manage Courses",
+          style: TextStyle(color: Colors.white),
+        ),
+        actions: const [LogoutButton()],
         backgroundColor: Colors.black87,
       ),
       body: const SafeArea(
@@ -83,22 +65,16 @@ class _CourseRegisterFormState extends State<_CourseRegisterForm> {
           _aboutCourse.text);
 
       bool status = await courseRepository.createCourse(c1);
-      SnackBar snackBar;
       if (status) {
-        snackBar = const SnackBar(
-          content: Text("Created a course!"),
-        );
+        statusSnackBar(context, SnackBarType.success, "Course Created!");
       } else {
-        snackBar = const SnackBar(
-          content: Text("Creating course failed!"),
-        );
+        statusSnackBar(context, SnackBarType.fail, "Failed Course Creation!");
       }
       setState(() {
         _courseName.text = '';
         _fees.text = '';
         _aboutCourse.text = '';
       });
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
   }
 

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_icon_snackbar/flutter_icon_snackbar.dart';
 import 'package:star_education_centre/constants.dart';
 import 'package:star_education_centre/models/return.dart';
+import 'package:star_education_centre/utils/logout_button.dart';
+import 'package:star_education_centre/utils/status_snackbar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -34,7 +37,8 @@ class _HomePageState extends State<HomePage> {
       // Fetch all required data
       Return studentInfo = await studentRepository.getTotalStudentNumber();
       Return courseInfo = await courseRepository.getTotalCourseNumber();
-      Return enrollmentInfo = await enrollRepository.getTotalEnrollmentsNumber();
+      Return enrollmentInfo =
+          await enrollRepository.getTotalEnrollmentsNumber();
       List<Map<String, dynamic>> courseList =
           await enrollRepository.getMostPopularCourses();
 
@@ -63,11 +67,7 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _isLoading = false; // Stop loading if there is an error
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error: $error"),
-        ),
-      );
+      statusSnackBar(context, SnackBarType.fail, "Error $error");
     }
   }
 
@@ -77,11 +77,9 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text(
           "⭐ Star Education Centre ⭐",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
+        actions: const [LogoutButton()],
         centerTitle: true,
         backgroundColor: Colors.black87,
       ),

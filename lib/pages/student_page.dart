@@ -1,11 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_icon_snackbar/flutter_icon_snackbar.dart';
 import 'package:star_education_centre/constants.dart';
 import 'package:star_education_centre/models/course.dart';
 import 'package:star_education_centre/models/return.dart';
 import 'package:star_education_centre/models/student.dart';
 import 'package:star_education_centre/utils/custom_text_field.dart';
 import 'package:star_education_centre/utils/hoverable_container.dart';
+import 'package:star_education_centre/utils/logout_button.dart';
+import 'package:star_education_centre/utils/status_snackbar.dart';
 
 class StudentPage extends StatefulWidget {
   const StudentPage({super.key});
@@ -24,32 +27,11 @@ class _StudentPageState extends State<StudentPage> {
           icon: const Icon(Icons.menu_rounded),
         ),
         centerTitle: true,
-        title: const Text("Manage Students", style: TextStyle(color: Colors.white),),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: IconButton(
-              onPressed: () => {},
-              icon: const Icon(Icons.logout_rounded),
-              style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all(
-                  Colors.redAccent.withOpacity(0.2),
-                ),
-                shape: WidgetStateProperty.all(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12), // Rounded border
-                  ),
-                ),
-                side: WidgetStateProperty.all(
-                  const BorderSide(
-                    color: Colors.redAccent, // Border color redAccent
-                    width: 1, // Border width
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
+        title: const Text(
+          "Manage Students",
+          style: TextStyle(color: Colors.white),
+        ),
+        actions: const [LogoutButton()],
         backgroundColor: Colors.black87,
       ),
       body: const SafeArea(
@@ -103,12 +85,7 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
         });
       });
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error: $error"),
-        ),
-      );
-      print('Error fetching courses: $error');
+      statusSnackBar(context, SnackBarType.fail, "Error $error");
     }
   }
 
@@ -177,26 +154,20 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
           _phoneCon.text,
           _addressCon.text,
           Timestamp.fromDate(startDate),
-          _sectionValue!, 0);
+          _sectionValue!,
+          0);
 
       // Register the student
       Return response = await studentRepository.registerStudent(s1);
-      SnackBar snackBar;
 
       if (response.status) {
-        snackBar = const SnackBar(
-          content: Text("Registered Student!"),
-        );
+        statusSnackBar(
+            context, SnackBarType.success, "Successfully Registered");
         currentStudentId =
             response.data; // Get the student ID after successful registration
       } else {
-        snackBar = const SnackBar(
-          content: Text("Registration Failed!"),
-        );
+        statusSnackBar(context, SnackBarType.fail, "Failed Registration");
       }
-
-      // Show the snackbar message
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
       if (response.status) {
         // Prepare a Map for the selected courses and their corresponding fees
@@ -212,27 +183,22 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
 
             selectedCoursesMap[currentCourse.courseId] = currentCourse.fees;
           } catch (e) {
-            print('Error finding course: $e');
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Selected course not found!")),
-            );
+            statusSnackBar(
+                context, SnackBarType.fail, "Selected course not found!");
           }
         }
 
         // Enroll the student in the selected courses
         if (selectedCoursesMap.isNotEmpty) {
           Return enrollmentResponse =
-              await studentRepository.enrollCourses(s1, selectedCoursesMap );
+              await studentRepository.enrollCourses(s1, selectedCoursesMap);
 
           if (enrollmentResponse.status) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                  content: Text("Enrolled in courses successfully!")),
-            );
+            statusSnackBar(context, SnackBarType.success,
+                "Enrolled in courses successfully!");
           } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Course enrollment failed!")),
-            );
+            statusSnackBar(
+                context, SnackBarType.fail, "Course enrollment failed!");
           }
         }
       }
@@ -410,7 +376,10 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
                     height: 50,
                     child: ElevatedButton(
                       onPressed: _showCourseSelectionDialog,
-                      child: const Text('Select Courses', style: TextStyle(color: Colors.black),),
+                      child: const Text(
+                        'Select Courses',
+                        style: TextStyle(color: Colors.black),
+                      ),
                     ),
                   ),
                   Text(
@@ -535,7 +504,8 @@ class _StudentListState extends State<_StudentList> {
 
                   // Display filtered students
                   return GridView.builder(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 3,
                       crossAxisSpacing: 8,
                       mainAxisSpacing: 8,

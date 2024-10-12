@@ -9,4 +9,5 @@ CourseRepository courseRepository = CourseRepository();
 EnrollRepository enrollRepository = EnrollRepository();
 
 const String loginEmail = "stareducation@centre.com";
-const String loginPassword = '12345678' ; // my prefer password -> "\$starEducati0n"
+const String loginPassword =
+    '12345678'; // my prefer password -> "\$starEducati0n"

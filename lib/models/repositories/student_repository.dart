@@ -29,7 +29,7 @@ class StudentRepository {
   Stream<List<Student>> readStudents() {
     return _studentFireStore.snapshots().asyncMap((snapshot) async {
       List<Future<Student>> futures = snapshot.docs.map((doc) async {
-        return await Student.fromDocument(doc);
+        return Student.fromDocument(doc);
       }).toList();
 
       return await Future.wait(futures);
