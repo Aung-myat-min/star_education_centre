@@ -139,7 +139,6 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
   }
 
   Future<void> registerStudent() async {
-    String? currentStudentId;
 
     if (_formKey.currentState!.validate()) {
       var uniqueId = uuid.v1();
@@ -147,15 +146,15 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
 
       // Create new student object
       Student s1 = Student.determineStudentClass(
-          uniqueId,
-          _firstNameCon.text,
-          _lastNameCon.text,
-          _emailCon.text,
-          _phoneCon.text,
-          _addressCon.text,
-          Timestamp.fromDate(startDate),
-          _sectionValue!,
-          0);
+          sId: uniqueId,
+          firstName: _firstNameCon.text,
+          lastName: _lastNameCon.text,
+          email: _emailCon.text,
+          phone: _phoneCon.text,
+          address: _addressCon.text,
+          startDate: Timestamp.fromDate(startDate),
+          section: _sectionValue!,
+          numberOfCourses: 0);
 
       // Register the student
       Return response = await studentRepository.registerStudent(s1);
@@ -163,8 +162,6 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
       if (response.status) {
         statusSnackBar(
             context, SnackBarType.success, "Successfully Registered");
-        currentStudentId =
-            response.data; // Get the student ID after successful registration
       } else {
         statusSnackBar(context, SnackBarType.fail, "Failed Registration");
       }

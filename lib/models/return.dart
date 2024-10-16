@@ -1,3 +1,4 @@
+// This is class is for better error handling
 class Return<T> {
   bool status;
   T? data;

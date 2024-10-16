@@ -43,15 +43,15 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
   Future<void> _updateStudentInfo() async {
     try {
       Student s1 = Student(
-          widget.student.studentId,
-          _firstNameCon.text,
-          _lastNameCon.text,
-          _emailCon.text,
-          _phoneCon.text,
-          _addressCon.text,
-          _sectionValue!,
-          _startDate!,
-          currentStudent.numberOfCourses);
+          sId: widget.student.studentId,
+          firstName: _firstNameCon.text,
+          lastName: _lastNameCon.text,
+          email: _emailCon.text,
+          phone: _phoneCon.text,
+          address: _addressCon.text,
+          section: _sectionValue!,
+          startDate: _startDate!,
+          numberOfCourses: currentStudent.numberOfCourses);
       bool status = await studentRepository.updateStudent(s1);
 
       if (status) {
@@ -66,10 +66,11 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
   }
 
   Future<void> _deleteStudent() async {
-    bool confirmation = await showConfirmationDialog(context, "Delete Student?", "Are you sure? This action can't be undone.");
-    if(confirmation){
+    bool confirmation = await showConfirmationDialog(context, "Delete Student?",
+        "Are you sure? This action can't be undone.");
+    if (confirmation) {
       bool status =
-      await studentRepository.deleteStudent(currentStudent.studentId);
+          await studentRepository.deleteStudent(currentStudent.studentId);
 
       if (status) {
         statusSnackBar(context, SnackBarType.alert, "Student Deleted!");

@@ -2,17 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class Person {
   String get firstName;
-
   String get lastName;
-
   String get email;
-
   String get phone;
-
   String get address;
 }
 
-//default student class
+// Default student class
 class Student implements Person {
   final String _sId;
   @override
@@ -29,8 +25,17 @@ class Student implements Person {
   Timestamp startDate;
   int numberOfCourses;
 
-  Student(this._sId, this.firstName, this.lastName, this.email, this.phone,
-      this.address, this.section, this.startDate, this.numberOfCourses);
+  Student({
+    required String sId,
+    required this.firstName,
+    required this.lastName,
+    required this.email,
+    required this.phone,
+    required this.address,
+    required this.section,
+    required this.startDate,
+    required this.numberOfCourses,
+  }) : _sId = sId;
 
   String get studentId => _sId;
 
@@ -66,82 +71,161 @@ class Student implements Person {
     final Timestamp startDate = data['startDate'] as Timestamp;
     final int numberOfCourses = data['numberOfCourses'];
 
-    return determineStudentClass(sId, firstName, lastName, email, phone,
-        address, startDate, section, numberOfCourses);
+    return determineStudentClass(
+      sId: sId,
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      phone: phone,
+      address: address,
+      startDate: startDate,
+      section: section,
+      numberOfCourses: numberOfCourses,
+    );
   }
 
   // Factory method to create instances based on number of enrollments
-  static Student determineStudentClass(
-      String sId,
-      String firstName,
-      String lastName,
-      String email,
-      String phone,
-      String address,
-      Timestamp startDate,
-      String section,
-      int numberOfCourses) {
+  static Student determineStudentClass({
+    required String sId,
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String phone,
+    required String address,
+    required Timestamp startDate,
+    required String section,
+    required int numberOfCourses,
+  }) {
     switch (numberOfCourses) {
       case 0:
-        return Student(sId, firstName, lastName, email, phone, address, section,
-            startDate, numberOfCourses);
+        return Student(
+          sId: sId,
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+          phone: phone,
+          address: address,
+          section: section,
+          startDate: startDate,
+          numberOfCourses: numberOfCourses,
+        );
       case 1:
-        return RegisteredStudent(sId, firstName, lastName, email, phone,
-            address, section, startDate, numberOfCourses);
+        return RegisteredStudent(
+          sId: sId,
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+          phone: phone,
+          address: address,
+          section: section,
+          startDate: startDate,
+          numberOfCourses: numberOfCourses,
+        );
       case 2:
-        return OldStudent(sId, firstName, lastName, email, phone, address,
-            section, startDate, numberOfCourses);
+        return OldStudent(
+          sId: sId,
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+          phone: phone,
+          address: address,
+          section: section,
+          startDate: startDate,
+          numberOfCourses: numberOfCourses,
+        );
       default:
-        return RoyalStudent(sId, firstName, lastName, email, phone, address,
-            section, startDate, numberOfCourses);
+        return RoyalStudent(
+          sId: sId,
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+          phone: phone,
+          address: address,
+          section: section,
+          startDate: startDate,
+          numberOfCourses: numberOfCourses,
+        );
     }
   }
 }
 
 // Subclasses for Registered, Old, and Royal Students
 class RegisteredStudent extends Student {
-  RegisteredStudent(
-      super.sId,
-      super.firstName,
-      super.lastName,
-      super.email,
-      super.phone,
-      super.address,
-      super.section,
-      super.startDate,
-      super.numberOfCourses);
+  RegisteredStudent({
+    required String sId,
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String phone,
+    required String address,
+    required String section,
+    required Timestamp startDate,
+    required int numberOfCourses,
+  }) : super(
+    sId: sId,
+    firstName: firstName,
+    lastName: lastName,
+    email: email,
+    phone: phone,
+    address: address,
+    section: section,
+    startDate: startDate,
+    numberOfCourses: numberOfCourses,
+  );
 
   @override
   int getDiscount() => 5; // Override to provide specific discount
 }
 
 class OldStudent extends Student {
-  OldStudent(
-      super.sId,
-      super.firstName,
-      super.lastName,
-      super.email,
-      super.phone,
-      super.address,
-      super.section,
-      super.startDate,
-      super.numberOfCourses);
+  OldStudent({
+    required String sId,
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String phone,
+    required String address,
+    required String section,
+    required Timestamp startDate,
+    required int numberOfCourses,
+  }) : super(
+    sId: sId,
+    firstName: firstName,
+    lastName: lastName,
+    email: email,
+    phone: phone,
+    address: address,
+    section: section,
+    startDate: startDate,
+    numberOfCourses: numberOfCourses,
+  );
 
   @override
   int getDiscount() => 10; // Override to provide specific discount
 }
 
 class RoyalStudent extends Student {
-  RoyalStudent(
-      super.sId,
-      super.firstName,
-      super.lastName,
-      super.email,
-      super.phone,
-      super.address,
-      super.section,
-      super.startDate,
-      super.numberOfCourses);
+  RoyalStudent({
+    required String sId,
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String phone,
+    required String address,
+    required String section,
+    required Timestamp startDate,
+    required int numberOfCourses,
+  }) : super(
+    sId: sId,
+    firstName: firstName,
+    lastName: lastName,
+    email: email,
+    phone: phone,
+    address: address,
+    section: section,
+    startDate: startDate,
+    numberOfCourses: numberOfCourses,
+  );
 
   @override
   int getDiscount() => 20; // Override to provide specific discount

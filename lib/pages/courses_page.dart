@@ -61,8 +61,11 @@ class _CourseRegisterFormState extends State<_CourseRegisterForm> {
   Future<void> createCourse() async {
     if (_formKey.currentState!.validate()) {
       var uniqueId = uuid.v1();
-      Course c1 = Course(uniqueId, _courseName.text, double.parse(_fees.text),
-          _aboutCourse.text);
+      Course c1 = Course(
+          cId: uniqueId,
+          courseName: _courseName.text,
+          fees: double.parse(_fees.text),
+          aboutCourse: _aboutCourse.text);
 
       bool status = await courseRepository.createCourse(c1);
       if (status) {

@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:star_education_centre/constants.dart';
 import 'package:star_education_centre/models/enrollment.dart';
-import 'package:star_education_centre/models/student.dart';
 import 'package:star_education_centre/models/return.dart';
+import 'package:star_education_centre/models/student.dart';
 
 class StudentRepository {
   final CollectionReference _studentFireStore =
-  FirebaseFirestore.instance.collection("students");
+      FirebaseFirestore.instance.collection("students");
 
   // Method to create (register) a student in Firestore
   Future<Return> registerStudent(Student student) async {
@@ -36,12 +36,11 @@ class StudentRepository {
     });
   }
 
-
   // Method to read a student by Id
   Future<Student?> readStudentById(String studentId) async {
     try {
       QuerySnapshot snapshot =
-      await _studentFireStore.where('sId', isEqualTo: studentId).get();
+          await _studentFireStore.where('sId', isEqualTo: studentId).get();
 
       if (snapshot.docs.isNotEmpty) {
         return Student.fromDocument(snapshot.docs.first);
@@ -110,7 +109,16 @@ class StudentRepository {
 
     try {
       final DateTime enrolledT = DateTime.now();
-      Student determinedStudent = Student.determineStudentClass(student.studentId, student.firstName, student.lastName, student.email, student.phone, student.address, student.startDate, student.section, student.numberOfCourses);
+      Student determinedStudent = Student.determineStudentClass(
+          sId: student.studentId,
+          firstName: student.firstName,
+          lastName: student.lastName,
+          email: student.email,
+          phone: student.phone,
+          address: student.address,
+          startDate: student.startDate,
+          section: student.section,
+          numberOfCourses: student.numberOfCourses);
 
       print(student);
       // Calculate the discount based on the number of enrollments
@@ -128,12 +136,12 @@ class StudentRepository {
         final String enId = uuid.v1();
 
         Enrollment newEnrollment = Enrollment(
-          enId,
-          discount,
-          enrolledT,
-          totalFee,
-          student.studentId,
-          courseId,
+          enId: enId,
+          discount: discount,
+          enrolledT: enrolledT,
+          totalFee: totalFee,
+          studentId: student.studentId,
+          courseId: courseId,
         );
 
         // Attempt to enroll the student in the course
@@ -148,12 +156,10 @@ class StudentRepository {
 
       // Set the response based on whether all enrollments were successful
       response.status = allEnrollmentsSuccessful;
-
     } catch (error) {
       print("Error Enrolling Courses: $error");
       response.status = false;
     }
     return response;
   }
-
 }

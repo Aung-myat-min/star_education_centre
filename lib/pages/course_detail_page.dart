@@ -60,10 +60,10 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
       try {
         // Ensure that all fields are properly filled and valid
         Course c1 = Course(
-          widget.cId,
-          _courseName.text,
-          double.parse(_fees.text),
-          _aboutCourse.text,
+          cId: widget.cId,
+          courseName: _courseName.text,
+          fees: double.parse(_fees.text),
+          aboutCourse: _aboutCourse.text,
         );
 
         bool status = await courseRepository.updateCourse(c1);

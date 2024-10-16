@@ -9,13 +9,19 @@ class Enrollment {
   String studentId; // ID of the student (relation)
   String courseId; // ID of the course (relation)
 
-  Enrollment(this._enId, this.discount, this.enrolledT, this.totalFee,
-      this.studentId, this.courseId);
+  Enrollment({
+    required String enId,
+    required this.discount,
+    required this.enrolledT,
+    required this.totalFee,
+    required this.studentId,
+    required this.courseId,
+  }) : _enId = enId;
 
   // Getter for private enrollId
   String get enrollId => _enId;
 
-  //convert object to a Map
+  // Convert object to a Map
   Map<String, dynamic> toMap() {
     return {
       'enId': _enId,
@@ -23,23 +29,23 @@ class Enrollment {
       'discount': discount,
       'totalFee': totalFee,
       'studentId': studentId,
-      'courseId': courseId
+      'courseId': courseId,
     };
   }
 
-  //method to create enrollment object from doc
+  // Method to create Enrollment object from Firestore document
   static Enrollment fromDocument(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     final Timestamp timestamp = data['enrolledT'] as Timestamp;
     final DateTime enrolledDateTime = timestamp.toDate();
 
     return Enrollment(
-      data['enId'],
-      data['discount'],
-      enrolledDateTime,
-      data['totalFee'],
-      data['studentId'],
-      data['courseId'],
+      enId: data['enId'],
+      discount: data['discount'],
+      enrolledT: enrolledDateTime,
+      totalFee: data['totalFee'],
+      studentId: data['studentId'],
+      courseId: data['courseId'],
     );
   }
 }
