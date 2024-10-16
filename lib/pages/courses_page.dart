@@ -67,7 +67,7 @@ class _CourseRegisterFormState extends State<_CourseRegisterForm> {
           fees: double.parse(_fees.text),
           aboutCourse: _aboutCourse.text);
 
-      bool status = await courseRepository.createCourse(c1);
+      bool status = await courseActions.createCourse(c1);
       if (status) {
         statusSnackBar(context, SnackBarType.success, "Course Created!");
       } else {
@@ -96,7 +96,6 @@ class _CourseRegisterFormState extends State<_CourseRegisterForm> {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
         child: Form(
-          // Wrap the form elements in a Form widget
           key: _formKey,
           child: Column(
             children: [
@@ -162,7 +161,7 @@ class _CourseRegisterFormState extends State<_CourseRegisterForm> {
               ),
               const SizedBox(height: 30),
               SizedBox(
-                height: 50, // Set your desired height
+                height: 50,
                 child: ElevatedButton(
                   onPressed: createCourse,
                   style: ElevatedButton.styleFrom(
@@ -222,7 +221,7 @@ class _CourseListState extends State<_CourseList> {
             ),
           ),
           StreamBuilder<List<Course>>(
-            stream: courseRepository.getCourses(),
+            stream: courseActions.getCourses(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(

@@ -26,7 +26,8 @@ Future<bool> showConfirmationDialog(
                 color: Colors.grey[700],
               ),
             ),
-            actionsPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            actionsPadding:
+                const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             actions: <Widget>[
               TextButton(
                 onPressed: () {

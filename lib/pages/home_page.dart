@@ -19,7 +19,7 @@ class _HomePageState extends State<HomePage> {
   String? mostEnrolledCourse;
   List<Map<String, dynamic>> popularCourses = [];
 
-  bool _isLoading = true; // To track the loading state
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -29,18 +29,16 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _getInfos() async {
     try {
-      // Set loading to true when starting to fetch data
       setState(() {
         _isLoading = true;
       });
 
       // Fetch all required data
-      Return studentInfo = await studentRepository.getTotalStudentNumber();
-      Return courseInfo = await courseRepository.getTotalCourseNumber();
-      Return enrollmentInfo =
-          await enrollRepository.getTotalEnrollmentsNumber();
+      Return studentInfo = await studentActions.getTotalStudentNumber();
+      Return courseInfo = await courseActions.getTotalCourseNumber();
+      Return enrollmentInfo = await enrollActions.getTotalEnrollmentsNumber();
       List<Map<String, dynamic>> courseList =
-          await enrollRepository.getMostPopularCourses();
+          await enrollActions.getMostPopularCourses();
 
       // Check for errors in the data fetching
       if (studentInfo.error || studentInfo.status == false) {
@@ -61,7 +59,7 @@ class _HomePageState extends State<HomePage> {
         mostEnrolledCourse =
             courseList.isNotEmpty ? courseList[0]["courseName"] : "N/A";
         popularCourses = courseList;
-        _isLoading = false; // Set loading to false after fetching the data
+        _isLoading = false;
       });
     } catch (error) {
       setState(() {
@@ -303,6 +301,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ],
             ),
+
             // Table rows with popular courses data
             for (var course in courses)
               TableRow(

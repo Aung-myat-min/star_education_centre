@@ -85,5 +85,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'amm-stareducationcentre.appspot.com',
     measurementId: 'G-LWKFXW1KQM',
   );
-
 }

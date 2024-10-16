@@ -2,12 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:star_education_centre/models/course.dart';
 import 'package:star_education_centre/models/return.dart';
 
-class CourseRepository{
+class CourseActions {
   final CollectionReference _courseFireStore =
-  FirebaseFirestore.instance.collection("courses");
+      FirebaseFirestore.instance.collection("courses");
 
-
-   Future<Return> getTotalCourseNumber() async {
+  Future<Return> getTotalCourseNumber() async {
     Return response = Return(status: false);
 
     try {
@@ -18,11 +17,15 @@ class CourseRepository{
 
       // Assign the count result to the response
       response.status = true;
-      response.data = snapshot.count; // The number of documents (students)
+
+      // The number of documents (students)
+      response.data = snapshot.count;
     } catch (error) {
       print('Error $error');
       response.error = true;
-      response.data = error; // Assign the error to the response
+
+      // Assign the error to the response
+      response.data = error;
       rethrow;
     }
 
@@ -45,17 +48,17 @@ class CourseRepository{
   }
 
   // Read (Get) courses from Firestore
-   Stream<List<Course>> getCourses() {
+  Stream<List<Course>> getCourses() {
     return _courseFireStore.snapshots().map((snapshot) {
       return snapshot.docs.map((doc) => Course.fromDocument(doc)).toList();
     });
   }
 
   // Read student by Id
-   Future<Course?> readCourseById(String cId) async {
+  Future<Course?> readCourseById(String cId) async {
     try {
       QuerySnapshot snapshot =
-      await _courseFireStore.where('cId', isEqualTo: cId).get();
+          await _courseFireStore.where('cId', isEqualTo: cId).get();
 
       if (snapshot.docs.isNotEmpty) {
         return Course.fromDocument(snapshot.docs.first);

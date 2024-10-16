@@ -69,7 +69,7 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
   final List<String> _selectedCourses = []; // List to hold selected course IDs
   double _totalCourseFees = 0;
 
-  final _formKey = GlobalKey<FormState>(); // Key for form validation
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -79,7 +79,7 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
 
   Future<void> _getCourses() async {
     try {
-      courseRepository.getCourses().listen((courses) {
+      courseActions.getCourses().listen((courses) {
         setState(() {
           _courseList = courses;
         });
@@ -157,7 +157,7 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
           numberOfCourses: 0);
 
       // Register the student
-      Return response = await studentRepository.registerStudent(s1);
+      Return response = await studentActions.registerStudent(s1);
 
       if (response.status) {
         statusSnackBar(
@@ -188,7 +188,7 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
         // Enroll the student in the selected courses
         if (selectedCoursesMap.isNotEmpty) {
           Return enrollmentResponse =
-              await studentRepository.enrollCourses(s1, selectedCoursesMap);
+              await studentActions.enrollCourses(s1, selectedCoursesMap);
 
           if (enrollmentResponse.status) {
             statusSnackBar(context, SnackBarType.success,
@@ -409,7 +409,7 @@ class _StudentListState extends State<_StudentList> {
   String _searchQuery = ''; // For name and ID search
   String? _selectedSection; // For section filter
 
-  final List<String> _sections = ['A', 'B', 'C', 'D']; // Sections for dropdown
+  final List<String> _sections = ['A', 'B', 'C', 'D'];
 
   // Method to filter students by name, ID, and section
   List<Student> _filterStudents(List<Student> students) {
@@ -477,7 +477,7 @@ class _StudentListState extends State<_StudentList> {
             SizedBox(
               height: 300,
               child: StreamBuilder<List<Student>>(
-                stream: studentRepository.readStudents(),
+                stream: studentActions.readStudents(),
                 // Your stream of students
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {

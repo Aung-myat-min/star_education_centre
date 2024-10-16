@@ -52,7 +52,7 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
           section: _sectionValue!,
           startDate: _startDate!,
           numberOfCourses: currentStudent.numberOfCourses);
-      bool status = await studentRepository.updateStudent(s1);
+      bool status = await studentActions.updateStudent(s1);
 
       if (status) {
         statusSnackBar(
@@ -70,7 +70,7 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
         "Are you sure? This action can't be undone.");
     if (confirmation) {
       bool status =
-          await studentRepository.deleteStudent(currentStudent.studentId);
+          await studentActions.deleteStudent(currentStudent.studentId);
 
       if (status) {
         statusSnackBar(context, SnackBarType.alert, "Student Deleted!");
@@ -89,7 +89,7 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
 
   Future<void> _getCourses() async {
     try {
-      courseRepository.getCourses().listen((courses) {
+      courseActions.getCourses().listen((courses) {
         setState(() {
           _courseList = courses;
         });
@@ -102,7 +102,7 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
 
   Future<void> _enrollCourseDialog() async {
     // Fetch the student's current enrollments
-    final List<Enrollment> enrollments = await enrollRepository
+    final List<Enrollment> enrollments = await enrollActions
         .getEnrollmentByStudent(widget.student.studentId)
         .first;
 
@@ -187,7 +187,8 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
 
   Future<void> _enrollCourse() async {
     Map<String, double> selectedCoursesMap = {};
-    // Populate the map with selected courses and their fees
+
+    // Populate the map with selected courses and fees
     for (var courseId in _selectedCourses) {
       Course? selectedCourse = _courseList.firstWhere(
         (course) => course.courseId == courseId,
@@ -201,11 +202,12 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
       return;
     }
 
-    Return enrollmentResponse = await studentRepository.enrollCourses(
-        currentStudent, selectedCoursesMap);
+    Return enrollmentResponse =
+        await studentActions.enrollCourses(currentStudent, selectedCoursesMap);
 
     if (enrollmentResponse.status) {
-      _selectedCourses.clear(); // Clear selected courses
+      // Clear selected courses
+      _selectedCourses.clear();
 
       statusSnackBar(
           context, SnackBarType.success, "Successfully Enrolled Courses!");
@@ -244,7 +246,7 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
     determineDiscount();
 
     _enrollments =
-        enrollRepository.getEnrollmentByStudent(widget.student.studentId);
+        enrollActions.getEnrollmentByStudent(widget.student.studentId);
     _getCourses();
   }
 
@@ -566,8 +568,7 @@ class _EnrolledCoursesState extends State<_EnrolledCourses> {
                 Column(
                   children: enrollments.map((enrollment) {
                     return FutureBuilder<Course?>(
-                      future:
-                          courseRepository.readCourseById(enrollment.courseId),
+                      future: courseActions.readCourseById(enrollment.courseId),
                       builder: (context, courseSnapshot) {
                         if (courseSnapshot.connectionState ==
                             ConnectionState.waiting) {

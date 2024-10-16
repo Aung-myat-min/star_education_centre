@@ -1,12 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-abstract class Person {
-  String get firstName;
-  String get lastName;
-  String get email;
-  String get phone;
-  String get address;
-}
+import 'package:star_education_centre/models/person.dart';
 
 // Default student class
 class Student implements Person {
@@ -152,26 +145,16 @@ class Student implements Person {
 // Subclasses for Registered, Old, and Royal Students
 class RegisteredStudent extends Student {
   RegisteredStudent({
-    required String sId,
-    required String firstName,
-    required String lastName,
-    required String email,
-    required String phone,
-    required String address,
-    required String section,
-    required Timestamp startDate,
-    required int numberOfCourses,
-  }) : super(
-    sId: sId,
-    firstName: firstName,
-    lastName: lastName,
-    email: email,
-    phone: phone,
-    address: address,
-    section: section,
-    startDate: startDate,
-    numberOfCourses: numberOfCourses,
-  );
+    required super.sId,
+    required super.firstName,
+    required super.lastName,
+    required super.email,
+    required super.phone,
+    required super.address,
+    required super.section,
+    required super.startDate,
+    required super.numberOfCourses,
+  });
 
   @override
   int getDiscount() => 5; // Override to provide specific discount
@@ -179,26 +162,16 @@ class RegisteredStudent extends Student {
 
 class OldStudent extends Student {
   OldStudent({
-    required String sId,
-    required String firstName,
-    required String lastName,
-    required String email,
-    required String phone,
-    required String address,
-    required String section,
-    required Timestamp startDate,
-    required int numberOfCourses,
-  }) : super(
-    sId: sId,
-    firstName: firstName,
-    lastName: lastName,
-    email: email,
-    phone: phone,
-    address: address,
-    section: section,
-    startDate: startDate,
-    numberOfCourses: numberOfCourses,
-  );
+    required super.sId,
+    required super.firstName,
+    required super.lastName,
+    required super.email,
+    required super.phone,
+    required super.address,
+    required super.section,
+    required super.startDate,
+    required super.numberOfCourses,
+  });
 
   @override
   int getDiscount() => 10; // Override to provide specific discount
@@ -206,26 +179,16 @@ class OldStudent extends Student {
 
 class RoyalStudent extends Student {
   RoyalStudent({
-    required String sId,
-    required String firstName,
-    required String lastName,
-    required String email,
-    required String phone,
-    required String address,
-    required String section,
-    required Timestamp startDate,
-    required int numberOfCourses,
-  }) : super(
-    sId: sId,
-    firstName: firstName,
-    lastName: lastName,
-    email: email,
-    phone: phone,
-    address: address,
-    section: section,
-    startDate: startDate,
-    numberOfCourses: numberOfCourses,
-  );
+    required super.sId,
+    required super.firstName,
+    required super.lastName,
+    required super.email,
+    required super.phone,
+    required super.address,
+    required super.section,
+    required super.startDate,
+    required super.numberOfCourses,
+  });
 
   @override
   int getDiscount() => 20; // Override to provide specific discount

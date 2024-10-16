@@ -28,23 +28,21 @@ class CustomTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       readOnly: readonly,
-      // No need for force unwrapping (!)
       controller: controller,
       decoration: InputDecoration(
         hintText: hintText,
         border: readonly ? null : const OutlineInputBorder(),
         prefixIcon: prefixIcon != null
-            ? Icon(prefixIcon, color: Colors.blueGrey) // Prefix icon
+            ? Icon(prefixIcon, color: Colors.blueGrey)
             : null,
         suffixIcon: suffixIcon != null
-            ? Icon(suffixIcon, color: Colors.blueGrey) // Suffix icon
+            ? Icon(suffixIcon, color: Colors.blueGrey)
             : null,
       ),
       minLines: minLines,
       maxLines: maxLines ?? 1,
-      // Default to single-line text field
       validator: validator,
-      obscureText: obscureText, // No need for force unwrapping (!)
+      obscureText: obscureText,
     );
   }
 }

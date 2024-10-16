@@ -39,12 +39,11 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Future<void> onLoginSuccess()async {
+  Future<void> onLoginSuccess() async {
     LocalStorageService storageService = LocalStorageService();
     await storageService.saveLoginStatus(true);
     Navigator.pushReplacementNamed(context, '/home');
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +57,6 @@ class _LoginPageState extends State<LoginPage> {
                 key: _formKey,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  // Adjusts the size to fit the content
                   children: [
                     Text(
                       "Login Form!",

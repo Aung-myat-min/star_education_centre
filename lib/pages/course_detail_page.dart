@@ -22,7 +22,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   bool readonly = true;
   final _formKey = GlobalKey<FormState>();
 
-  Future<void> buutonClick() async {
+  Future<void> buttonClick() async {
     if (!readonly) {
       // Only update the course if the fields are editable
       if (_formKey.currentState!.validate()) {
@@ -36,7 +36,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
 
   Future<void> _loadCourse() async {
     try {
-      Course? course = await courseRepository.readCourseById(widget.cId);
+      Course? course = await courseActions.readCourseById(widget.cId);
 
       // Check if course exists
       if (course != null) {
@@ -58,7 +58,6 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   Future<void> updateCourse() async {
     if (_formKey.currentState!.validate()) {
       try {
-        // Ensure that all fields are properly filled and valid
         Course c1 = Course(
           cId: widget.cId,
           courseName: _courseName.text,
@@ -66,7 +65,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
           aboutCourse: _aboutCourse.text,
         );
 
-        bool status = await courseRepository.updateCourse(c1);
+        bool status = await courseActions.updateCourse(c1);
         if (status) {
           statusSnackBar(context, SnackBarType.success, "Updated Course!");
         } else {
@@ -177,7 +176,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                           child: SizedBox(
                             height: 50,
                             child: ElevatedButton(
-                              onPressed: buutonClick,
+                              onPressed: buttonClick,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.lightGreen,
                               ),
@@ -196,7 +195,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                           child: SizedBox(
                             height: 50,
                             child: ElevatedButton(
-                              onPressed: buutonClick,
+                              onPressed: buttonClick,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.red.shade300,
                               ),

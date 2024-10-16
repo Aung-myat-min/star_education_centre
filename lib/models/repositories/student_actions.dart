@@ -4,7 +4,7 @@ import 'package:star_education_centre/models/enrollment.dart';
 import 'package:star_education_centre/models/return.dart';
 import 'package:star_education_centre/models/student.dart';
 
-class StudentRepository {
+class StudentActions {
   final CollectionReference _studentFireStore =
       FirebaseFirestore.instance.collection("students");
 
@@ -120,10 +120,9 @@ class StudentRepository {
           section: student.section,
           numberOfCourses: student.numberOfCourses);
 
-      print(student);
       // Calculate the discount based on the number of enrollments
       final int discount = determinedStudent.getDiscount();
-      print('repo $discount');
+
       // Loop through each course and enroll the student
       for (String courseId in courseFeesMap.keys) {
         double courseFee = courseFeesMap[courseId]!;
@@ -145,7 +144,7 @@ class StudentRepository {
         );
 
         // Attempt to enroll the student in the course
-        bool status = await enrollRepository.enrollStudent(newEnrollment);
+        bool status = await enrollActions.enrollStudent(newEnrollment);
         if (!status) {
           allEnrollmentsSuccessful = false;
         }

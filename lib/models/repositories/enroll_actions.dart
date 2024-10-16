@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:star_education_centre/models/course.dart';
 import 'package:star_education_centre/models/enrollment.dart';
-import 'package:star_education_centre/models/repositories/course_repository.dart';
+import 'package:star_education_centre/models/repositories/course_actions.dart';
 import 'package:star_education_centre/models/return.dart';
 
-class EnrollRepository{
+class EnrollActions {
   final CollectionReference _enrollmentFireStore =
-  FirebaseFirestore.instance.collection('enrollments');
-  final CourseRepository _courseRepository = CourseRepository();
+      FirebaseFirestore.instance.collection('enrollments');
+  final CourseActions _courseActions = CourseActions();
 
   // Method to get the 3 most popular courses
   Future<List<Map<String, dynamic>>> getMostPopularCourses() async {
@@ -31,7 +31,7 @@ class EnrollRepository{
 
       for (var entry in sortedCourses.take(3)) {
         String courseId = entry.key;
-        Course? course = await _courseRepository.readCourseById(courseId);
+        Course? course = await _courseActions.readCourseById(courseId);
         if (course != null) {
           topCourses.add({
             'courseName': course.courseName,
@@ -59,11 +59,15 @@ class EnrollRepository{
 
       // Assign the count result to the response
       response.status = true;
-      response.data = snapshot.count; // The number of documents (students)
+
+      // The number of documents (students)
+      response.data = snapshot.count;
     } catch (error) {
       print('Error $error');
       response.error = true;
-      response.data = error; // Assign the error to the response
+
+      // Assign the error to the response
+      response.data = error;
       rethrow;
     }
 
@@ -74,11 +78,13 @@ class EnrollRepository{
       String courseId, DateTime date) {
     // Create timestamps for the start and end of the day
     Timestamp startDate = Timestamp.fromDate(
-        DateTime(date.year, date.month, date.day, 0, 0, 0)); // Start of the day
-    Timestamp endDate = Timestamp.fromDate(DateTime(
-        date.year, date.month, date.day, 23, 59, 59)); // End of the day
+      DateTime(date.year, date.month, date.day, 0, 0, 0),
+    );
 
-    print('Course ID: $courseId, Date: $date');
+    Timestamp endDate = Timestamp.fromDate(
+      DateTime(date.year, date.month, date.day, 23, 59, 59),
+    );
+
     return _enrollmentFireStore
         .where('courseId', isEqualTo: courseId)
         .where('enrolledT', isGreaterThanOrEqualTo: startDate)
@@ -96,7 +102,9 @@ class EnrollRepository{
     bool status = false;
 
     try {
-      await _enrollmentFireStore.doc(enrollment.enrollId).set(enrollment.toMap());
+      await _enrollmentFireStore
+          .doc(enrollment.enrollId)
+          .set(enrollment.toMap());
       status = true;
     } catch (error) {
       print("Error creating enrollment: $error");
@@ -125,10 +133,10 @@ class EnrollRepository{
   }
 
   // Read enrollment by Id
-   Future<Enrollment?> readEnrollmentById(String enId) async {
+  Future<Enrollment?> readEnrollmentById(String enId) async {
     try {
       QuerySnapshot snapshot =
-      await _enrollmentFireStore.where('enId', isEqualTo: enId).get();
+          await _enrollmentFireStore.where('enId', isEqualTo: enId).get();
 
       if (snapshot.docs.isNotEmpty) {
         return Enrollment.fromDocument(snapshot.docs.first);
@@ -141,7 +149,7 @@ class EnrollRepository{
     }
   }
 
-   Stream<List<Enrollment>> getEnrollmentByStudent(String studentId) {
+  Stream<List<Enrollment>> getEnrollmentByStudent(String studentId) {
     return _enrollmentFireStore
         .where('studentId', isEqualTo: studentId)
         .snapshots()
@@ -157,7 +165,9 @@ class EnrollRepository{
     bool status = false;
 
     try {
-      await _enrollmentFireStore.doc(enrollment.enrollId).update(enrollment.toMap());
+      await _enrollmentFireStore
+          .doc(enrollment.enrollId)
+          .update(enrollment.toMap());
       status = true;
     } catch (error) {
       print("Error updating enrollment: $error");

@@ -6,7 +6,7 @@ class LocalStorageService {
     final prefs = await SharedPreferences.getInstance();
     prefs.setBool('logged', isLoggedIn);
 
-    // Set expiration date (for example, 7 days from now)
+    // Set expiration date
     DateTime expirationDate = DateTime.now().add(const Duration(days: 30));
     prefs.setString('expiration_date', expirationDate.toIso8601String());
   }

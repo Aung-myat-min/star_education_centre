@@ -31,7 +31,7 @@ class _MainPageState extends State<MainPage> {
     return Scaffold(
       body: _pages[_currentIndex],
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(bottom: 16.0), // Add bottom margin
+        padding: const EdgeInsets.only(bottom: 16.0),
         child: SnakeNavigationBar.color(
           items: const [
             BottomNavigationBarItem(
