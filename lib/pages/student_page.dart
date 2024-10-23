@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icon_snackbar/flutter_icon_snackbar.dart';
 import 'package:star_education_centre/constants.dart';
 import 'package:star_education_centre/models/course.dart';
+import 'package:star_education_centre/models/factory/student_factory.dart';
 import 'package:star_education_centre/models/return.dart';
 import 'package:star_education_centre/models/student.dart';
 import 'package:star_education_centre/utils/custom_text_field.dart';
@@ -145,7 +146,7 @@ class _StuRegisterFormState extends State<_StuRegisterForm> {
       final DateTime startDate = DateTime.now();
 
       // Create new student object
-      Student s1 = Student.determineStudentClass(
+      Student s1 = StudentFactory.determineStudentClass(
           sId: uniqueId,
           firstName: _firstNameCon.text,
           lastName: _lastNameCon.text,

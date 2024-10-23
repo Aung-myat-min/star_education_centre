@@ -1,6 +1,6 @@
-import 'package:star_education_centre/models/repositories/course_actions.dart';
-import 'package:star_education_centre/models/repositories/enroll_actions.dart';
-import 'package:star_education_centre/models/repositories/student_actions.dart';
+import 'package:star_education_centre/models/actions/course_actions.dart';
+import 'package:star_education_centre/models/actions/enroll_actions.dart';
+import 'package:star_education_centre/models/actions/student_actions.dart';
 import 'package:uuid/uuid.dart';
 
 const uuid = Uuid();

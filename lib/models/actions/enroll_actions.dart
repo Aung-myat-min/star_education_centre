@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:star_education_centre/models/actions/course_actions.dart';
 import 'package:star_education_centre/models/course.dart';
 import 'package:star_education_centre/models/enrollment.dart';
-import 'package:star_education_centre/models/repositories/course_actions.dart';
 import 'package:star_education_centre/models/return.dart';
 
 class EnrollActions {

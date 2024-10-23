@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:star_education_centre/constants.dart';
 import 'package:star_education_centre/models/enrollment.dart';
+import 'package:star_education_centre/models/factory/student_factory.dart';
 import 'package:star_education_centre/models/return.dart';
 import 'package:star_education_centre/models/student.dart';
 
@@ -109,7 +110,7 @@ class StudentActions {
 
     try {
       final DateTime enrolledT = DateTime.now();
-      Student determinedStudent = Student.determineStudentClass(
+      Student determinedStudent = StudentFactory.determineStudentClass(
           sId: student.studentId,
           firstName: student.firstName,
           lastName: student.lastName,
