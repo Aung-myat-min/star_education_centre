@@ -32,7 +32,7 @@ class _HoverableContainerState extends State<HoverableContainer> {
         curve: Curves.easeInOut,
         padding: const EdgeInsets.all(12),
         constraints: BoxConstraints(
-          minWidth: MediaQuery.of(context).size.width * 0.4, // Responsive width
+          minWidth: MediaQuery.of(context).size.width * 0.4,
         ),
         decoration: BoxDecoration(
           color: _isHovered ? Colors.white38 : Colors.white60,
