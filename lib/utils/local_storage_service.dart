@@ -1,21 +1,24 @@
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class LocalStorageService {
-  // Method to save login status and expiration date
-  Future<void> saveLoginStatus(bool isLoggedIn) async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setBool('logged', isLoggedIn);
-
-    // Set expiration date
-    DateTime expirationDate = DateTime.now().add(const Duration(days: 30));
-    prefs.setString('expiration_date', expirationDate.toIso8601String());
+  // Open the box
+  Future<void> init() async {
+    await Hive.initFlutter();
+    await Hive.openBox('starEducation');
   }
 
-  // Method to check if the login status is still valid
+  Future<void> saveLoginStatus(bool isLoggedIn) async {
+    var box = Hive.box('starEducation');
+    await box.put('logged', isLoggedIn);
+
+    DateTime expirationDate = DateTime.now().add(const Duration(days: 30));
+    await box.put('expiration_date', expirationDate.toIso8601String());
+  }
+
   Future<bool> isLoggedIn() async {
-    final prefs = await SharedPreferences.getInstance();
-    bool? logged = prefs.getBool('logged');
-    String? expirationDateStr = prefs.getString('expiration_date');
+    var box = Hive.box('starEducation');
+    bool? logged = box.get('logged');
+    String? expirationDateStr = box.get('expiration_date');
 
     if (logged == true && expirationDateStr != null) {
       DateTime expirationDate = DateTime.parse(expirationDateStr);
@@ -29,10 +32,9 @@ class LocalStorageService {
     return false;
   }
 
-  // Method to clear login status
   Future<void> clearLoginStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.remove('logged');
-    prefs.remove('expiration_date');
+    var box = Hive.box('starEducation');
+    await box.delete('logged');
+    await box.delete('expiration_date');
   }
 }

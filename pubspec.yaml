@@ -41,11 +41,14 @@ dependencies:
   intl: ^0.19.0
   url_launcher: ^6.3.1
   flutter_icon_snackbar: ^1.2.1
-  shared_preferences: ^2.3.2
   flutter_snake_navigationbar: ^0.6.1
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
 
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+  integration_test:
     sdk: flutter
 
   # The "flutter_lints" package below contains a set of recommended lints to

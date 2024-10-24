@@ -3,14 +3,14 @@ import 'package:flutter_icon_snackbar/flutter_icon_snackbar.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:star_education_centre/utils/status_snackbar.dart';
 
-class WidgetTesting2 extends StatefulWidget {
-  const WidgetTesting2({super.key});
+class _WidgetTesting2 extends StatefulWidget {
+  const _WidgetTesting2({super.key});
 
   @override
-  State<WidgetTesting2> createState() => WidgetTesting2State();
+  State<_WidgetTesting2> createState() => _WidgetTesting2State();
 }
 
-class WidgetTesting2State extends State<WidgetTesting2> {
+class _WidgetTesting2State extends State<_WidgetTesting2> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -33,9 +33,10 @@ class WidgetTesting2State extends State<WidgetTesting2> {
 }
 
 void main() {
-  testWidgets('statusSnackBar shows wanted Status Bar', (WidgetTester tester) async {
+  testWidgets('statusSnackBar shows wanted Status Bar',
+      (WidgetTester tester) async {
     // Build a basic MaterialApp widget for the test
-    await tester.pumpWidget(const WidgetTesting2());
+    await tester.pumpWidget(const _WidgetTesting2());
 
     expect(find.byType(SnackBar), findsNothing);
 
