@@ -39,11 +39,13 @@ class _MainPageState extends State<MainPage> {
               label: 'Home',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.people),
+              key: Key('1'),
+              icon: Icon(Icons.people_alt),
               label: 'Students',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.book),
+              key: Key('2'),
+              icon: Icon(Icons.book_rounded),
               label: 'Courses',
             ),
           ],

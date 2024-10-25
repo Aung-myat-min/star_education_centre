@@ -5,7 +5,7 @@ import 'package:star_education_centre/main_page.dart';
 import 'package:star_education_centre/pages/auth/login_page.dart';
 import 'package:star_education_centre/utils/local_storage_service.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (kIsWeb) {
@@ -22,6 +22,7 @@ void main() async {
 
   // Check login status before running the app
   LocalStorageService service = LocalStorageService();
+  await service.init();
   bool isLoggedIn = await service.isLoggedIn();
 
   runApp(MyApp(isLoggedIn: isLoggedIn));
