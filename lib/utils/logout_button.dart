@@ -25,6 +25,7 @@ class _LogoutButtonState extends State<LogoutButton> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: IconButton(
+        key: Key("LogOut"),
         onPressed: logout,
         icon: const Icon(
           Icons.logout_rounded,

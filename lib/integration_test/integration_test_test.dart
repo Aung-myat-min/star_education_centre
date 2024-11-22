@@ -48,4 +48,14 @@ class IntegrationTest {
 
     expect(find.text("Create Course Here!"), findsOneWidget);
   }
+
+  static Future<void> logOut(WidgetTester tester) async {
+    await tester.tap(find.byKey(Key("LogOut")));
+    await tester.pump();
+
+    await tester.tap(find.text("Confirm"));
+    await tester.pumpAndSettle();
+
+    expect(find.text("Login Form!"), findsOne);
+  }
 }

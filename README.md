@@ -1,18 +1,17 @@
 # star_education_centre
 
-A new Flutter project.
+> This is a Student and Course Management Application. Developed for my year 2 university assignment.
 
-## Getting Started
+In this application, I use:
+- **Flutter** for frontend
+- **Firebase** for backend
 
-This project is a starting point for a Flutter application.
+## SOLID Principles
+I applied SOLID principles in this project.
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-
-IDX Url - https://idx.google.com/stareducationcentre-755633
+I used Single Responsibility in every project.
+> - Every object only responsible for its creation and transformation. (SRP) (Singleton Pattern)
+> - Methods of every object are separated by the principle of SRP.
+> - Person Abstract Object can be extended without needing to altering the base code. (LSP)
+> - In Student, _id(s) are private, allowing the program only to access it but cannot update it. (OCP)
+> - There is a student factory method which returns the associated Student Class according to the number of course he/she applied. (Factory Pattern)

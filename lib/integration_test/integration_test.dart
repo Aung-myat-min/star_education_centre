@@ -17,6 +17,9 @@ void main() {
       await IntegrationTest.navigateToStudentPage(tester);
 
       await IntegrationTest.navigateToCoursePage(tester);
+
+      await IntegrationTest.logOut(tester);
     });
+
   });
 }
